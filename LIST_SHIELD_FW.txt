@@ -1,0 +1,12 @@
+This firmware is ready to operate with the following shields:
+
+	1 - Led
+	1 - Relay
+	2 - Button
+	3 - Temperature Sensor MCP9701
+	4 - RGB Led
+	5 - Temperature and Umidity Sensor DHT11
+	6 - ADC 0-5VDC generic analogi input
+	7 - PIR Sensor HC-SR505
+	8 - Temperature and Umidity Sensor DHT22
+	9 - Capacitive Soil Moisture Sensor v1.2
