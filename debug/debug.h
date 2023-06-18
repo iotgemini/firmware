@@ -46,10 +46,17 @@ extern int cont1_debug;
 /*****************************************************************
  * 	PUBLIC FUCTIONS
 *****************************************************************/
-void 	UART_DEBUG_send_STR(unsigned char num_data, unsigned char *data, unsigned char line_feed); //it send a string through the UART only if is in debug mode
-void 	UART_DEBUG_send_STR2(unsigned char *data, unsigned char line_feed);
-void 	UART_DEBUG_send_NUM_BYTE_HEX(unsigned char byte_to_convert, unsigned char line_feed);
-void 	UART_DEBUG_send_STARS(unsigned char num_star_to_send);
+#ifdef UART_DEBUG
+	void 	UART_DEBUG_send_STR(unsigned char num_data, unsigned char *data, unsigned char line_feed); //it send a string through the UART only if is in debug mode
+	void 	UART_DEBUG_send_STR2(unsigned char *data, unsigned char line_feed);
+	void 	UART_DEBUG_send_NUM_BYTE_HEX(unsigned char byte_to_convert, unsigned char line_feed);
+	void 	UART_DEBUG_send_STARS(unsigned char num_star_to_send);
+
+	#ifdef UART_DEBUG_MANAGER
+		void 	UART_DEBUG_MANAGER_send_STR(unsigned char num_data, unsigned char *data, unsigned char line_feed);//it send a string through the UART only if is in debug mode
+		void 	UART_DEBUG_MANAGER_send_STR2(unsigned char *data, unsigned char line_feed);
+	#endif
+#endif
 
 /*****************************************************************
  * 	PRIVATE FUCTIONS

@@ -48,11 +48,16 @@
 
 #define 	START_ADDRESS_TIMER_RELAY_VALUE						0x134 	//4 bytes. id_data_eeprom_to_update = 0b0000000001000000. here are saved the value for semRelayTimer,RelayTimer_SS,RelayTimer_MM,RelayTimer_HH; 
 
-#define 	START_ADDRESS_INPUTS_DUTY_VALUE						0x138 	//8 bytes. fun_input_ctrl_output[8] where are saved the value for the functions Inputs Duty
+																//0x138	//8bytes FREE
 
 #define 	START_ADDRESS_SETTINGS_PLATFORM						0x140	//1 byte. id_data_eeprom_to_update = 0b0000000100000000. This used to keep off the Led TX (led blue)
 
 #define 	START_ADDRESS_TIMER_RELAY_VALUE_10MS				0x141 	//1 bytes. id_data_eeprom_to_update = 0b0000000001000000. here are saved the value for RelayTimer_10ms
+
+#define 	START_ADDRESS_INPUTS_DUTY_VALUE						0x142 	//10 bytes. fun_input_ctrl_output[8] where are saved the value for the functions Inputs Duty
+
+#define 	START_ADDRESS_THRESHOLD_VALUES						0x14C 	//10 bytes. id_data_eeprom_to_update = 0b0000001000000000.
+
 
 #define 	VALUE_VIRGIN_BYTE					0xFF
 

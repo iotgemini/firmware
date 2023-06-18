@@ -43,50 +43,82 @@ int cont1_debug;
 /*****************************************************************
  * 	PUBLIC FUCTIONS
 *****************************************************************/
-void 	UART_DEBUG_send_STR(unsigned char num_data, unsigned char *data, unsigned char line_feed){
-	unsigned char i;
-	if(line_feed==1){
-		USART_SendByte(0x0D); //carriage return
-		USART_SendByte(0x0A); //line feed
-		USART_SendByte('(');USART_SendByte('M');USART_SendByte('A');USART_SendByte('I');USART_SendByte('N');USART_SendByte(')');
-	}
-	for(i=0;i<num_data;i++){
-		USART_SendByte((unsigned char)*(data+i));
-	}
-}
+#ifdef UART_DEBUG
 
-void 	UART_DEBUG_send_STR2(unsigned char *data, unsigned char line_feed){
-	unsigned char i;
-	unsigned char num_data=strlen(data);
-	if(line_feed==1){
-		USART_SendByte(0x0D); //carriage return
-		USART_SendByte(0x0A); //line feed
-		USART_SendByte('(');USART_SendByte('M');USART_SendByte('A');USART_SendByte('I');USART_SendByte('N');USART_SendByte(')');
+	void 	UART_DEBUG_send_STR(unsigned char num_data, unsigned char *data, unsigned char line_feed){
+		unsigned char i;
+		if(line_feed==1){
+			USART_SendByte(0x0D); //carriage return
+			USART_SendByte(0x0A); //line feed
+			USART_SendByte('(');USART_SendByte('M');USART_SendByte('A');USART_SendByte('I');USART_SendByte('N');USART_SendByte(')');
+		}
+		for(i=0;i<num_data;i++){
+			USART_SendByte((unsigned char)*(data+i));
+		}
 	}
-	for(i=0;i<num_data;i++){
-		USART_SendByte((unsigned char)*(data+i));
-	}
-}
 
-void 	UART_DEBUG_send_NUM_BYTE_HEX(unsigned char byte_to_convert, unsigned char line_feed){
-	unsigned char hex_value[2];
-	byte_to_hexascii((unsigned char *)&byte_to_convert, hex_value);
-	USART_SendByte((unsigned char)'0');
-	USART_SendByte((unsigned char)'x');
-	USART_SendByte((unsigned char)(hex_value[0]));
-	USART_SendByte((unsigned char)(hex_value[1]));
-	if(line_feed==1){
-		USART_SendByte(0x0D); //carriage return
-		USART_SendByte(0x0A); //line feed
+	void 	UART_DEBUG_send_STR2(unsigned char *data, unsigned char line_feed){
+		unsigned char i;
+		unsigned char num_data = strlen(data);
+		if(line_feed==1){
+			USART_SendByte(0x0D); //carriage return
+			USART_SendByte(0x0A); //line feed
+			USART_SendByte('(');USART_SendByte('M');USART_SendByte('A');USART_SendByte('I');USART_SendByte('N');USART_SendByte(')');
+		}
+		for(i=0;i<num_data;i++){
+			USART_SendByte((unsigned char)*(data+i));
+		}
 	}
-}
 
-void 	UART_DEBUG_send_STARS(unsigned char num_star_to_send){
-	unsigned char i;
-	for(i=0;i<num_star_to_send;i++){
-		USART_SendByte('*');
+	void 	UART_DEBUG_send_NUM_BYTE_HEX(unsigned char byte_to_convert, unsigned char line_feed){
+		unsigned char hex_value[2];
+		byte_to_hexascii((unsigned char *)&byte_to_convert, hex_value);
+		USART_SendByte((unsigned char)'0');
+		USART_SendByte((unsigned char)'x');
+		USART_SendByte((unsigned char)(hex_value[0]));
+		USART_SendByte((unsigned char)(hex_value[1]));
+		if(line_feed==1){
+			USART_SendByte(0x0D); //carriage return
+			USART_SendByte(0x0A); //line feed
+		}
 	}
-}
+
+	void 	UART_DEBUG_send_STARS(unsigned char num_star_to_send){
+		unsigned char i;
+		for(i=0;i<num_star_to_send;i++){
+			USART_SendByte('*');
+		}
+	}
+
+
+	#ifdef UART_DEBUG_MANAGER
+		void 	UART_DEBUG_MANAGER_send_STR(unsigned char num_data, unsigned char *data, unsigned char line_feed){
+			unsigned char i;
+
+			if(line_feed==1){
+				USART_SendByte(0x0D); //carriage return
+				USART_SendByte(0x0A); //line feed
+				USART_SendByte('(');USART_SendByte('M');USART_SendByte('A');USART_SendByte('N');USART_SendByte('A');USART_SendByte('G');USART_SendByte('E');USART_SendByte('R');USART_SendByte(')');
+			}
+			for(i=0;i<num_data;i++){
+				USART_SendByte((unsigned char)*(data+i));
+			}
+		}
+		void 	UART_DEBUG_MANAGER_send_STR2(unsigned char *data, unsigned char line_feed){
+			unsigned char i;
+			unsigned char num_data=strlen(data);
+			if(line_feed==1){
+				USART_SendByte(0x0D); //carriage return
+				USART_SendByte(0x0A); //line feed
+				USART_SendByte('(');USART_SendByte('M');USART_SendByte('A');USART_SendByte('N');USART_SendByte('A');USART_SendByte('G');USART_SendByte('E');USART_SendByte('R');USART_SendByte(')');
+			}
+			for(i=0;i<num_data;i++){
+				USART_SendByte((unsigned char)*(data+i));
+			}
+
+		}
+	#endif
+#endif
 
 /*****************************************************************
  * 	PRIVATE FUCTIONS

@@ -329,9 +329,11 @@ void init_mcu(void){
 	#endif
 	init_Timer1(); // this code sets up timer1
 	#ifdef UART_DEBUG
-	UART_DEBUG_send_STR(22, (unsigned char *)"Initializing WDT......",1); //it send a string through the UART only if is in debug mode
-	#endif
+	UART_DEBUG_send_STR(13, (unsigned char *)"WDT DISABLED!",1); //it send a string through the UART only if is in debug mode
+	#else
 	wdt_init(); //init the WDT to occur after 30mS
+	#endif
+
 	sei(); //Abilita gli interrupts globali
 
 	#ifdef UART_DEBUG
@@ -391,7 +393,7 @@ void init_mcu(void){
 
 	#ifdef UART_DEBUG
 	//USART_Init_with_baudrate(USART_BAUDRATE); //used for debug. USART_BAUDRATE into myUsart328.h
-	UART_DEBUG_send_STR(20, (unsigned char *)"BEGIN INFINITE LOOP!\n",1); //it send a string through the UART only if is in debug mode
+	UART_DEBUG_send_STR2((unsigned char *)"BEGIN INFINITE LOOP!",1); //it send a string through the UART only if is in debug mode
 	#endif
 }
 

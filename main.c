@@ -2,7 +2,7 @@
 	MCU: 					ATmega328p
 	Programmer:				Emanuele Aimone
 	Version:				1.0
-	Last Update:			01 / 03 / 2023
+	Last Update:			18 / 06 / 2023
 	
 	Description:			FW per IOTGEMINI platform
 							
@@ -59,16 +59,17 @@ FUSES WITH BOOTLOADER:
 ------------------------------------------------------
 */
 
-#define F_CPU 16000000UL //this set the frequency used from the CPU to malke works the library delay.h
+#define F_CPU 16000000UL //this set the frequency used from the CPU to make works the library delay.h
 //#define F_CPU 8000000UL
 
 //*** DEFINE TO ENABLE/DISABLE FUNCTIONS
-//#define UART_DEBUG	0	//debug on UART at 115200. 0=attiva fino allo strato fisico di comunicazione
+//#define UART_DEBUG	0	//debug on UART at 57600. 0=attiva fino allo strato fisico di comunicazione
 //#define ENABLE_SPECIAL_FUNCTIONS
 
 
-//#define FW_VERSION_RF_IOTGEMINI 				1	//tis can go up to 65535. This will allow to reset the eeprom when the FW new is loaded on the MCU because it find on the eeprom a different version then will erase the eeprom
-#define FW_VERSION_RF_IOTGEMINI 				4	//v1.0.1.6  19/03/2023
+//#define FW_VERSION_RF_IOTGEMINI 				1	//this can go up to 65535. This will allow to reset the eeprom when the FW new is loaded on the MCU because it find on the eeprom a different version then will erase the eeprom
+#define FW_VERSION_RF_IOTGEMINI 				4	//v1.0.2.0  18/06/2023		//Added thresholds functions
+//#define FW_VERSION_RF_IOTGEMINI 				4	//v1.0.1.6  19/03/2023
 //#define FW_VERSION_RF_IOTGEMINI 				4	//v1.0.1.5
 //#define FW_VERSION_RF_IOTGEMINI 				4	//v1.0.1.4
 //#define FW_VERSION_RF_IOTGEMINI 				4	//v1.0.1.3

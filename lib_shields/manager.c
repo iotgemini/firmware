@@ -96,11 +96,16 @@ void 	manager_load_shields(void){
 	RelayTimer_HH = (unsigned char)eeprom_read_byte((unsigned char *)(START_ADDRESS_TIMER_RELAY_VALUE+3));
 	
 	
-	//variables used for the functions into RFPIMCU, function Inputs Duty
+
 	for(i=0;i<10;i++){
+		//variables used for the functions into RFPIMCU, function Inputs Duty
 		fun_input_ctrl_output[i] = (unsigned char)eeprom_read_byte((unsigned char *)(START_ADDRESS_INPUTS_DUTY_VALUE+i));
+
+		//variables used for the functions into RFPIMCU, function control output with THRESHOLD HIGH and LOW
+		fun_threshold_ctrl_output[i] = (unsigned char)eeprom_read_byte((unsigned char *)(START_ADDRESS_THRESHOLD_VALUES+i));
 	}
-	
+
+
 	//this variables make to update the eeprom into the function check_and_parse_functions_manager()
 	id_data_eeprom_to_update = 0;
 
@@ -116,17 +121,12 @@ void 	manager_load_shields(void){
 //	}else{
 //		for (int i=0; i<root_struct_shields->num_shield_linked; i++ ){
 
-	
-	#ifdef UART_DEBUG_MANAGER
-	//UART_DEBUG_MANAGER_send_STR2((unsigned char *)" LOADING SHIELDS FROM EEPROM:\n",1); //it send a string through the UART only if is in debug mode
-	#endif
-	
-	
+
 	unsigned int tempID = 0;
 	//unsigned char tempByteEEPROM = 0;
 		for (i=0; i<MAX_NUM_SHIELDS_CONNECTABLE; i++ ){ //
 		
-			#ifdef UART_DEBUG_MANAGER
+			#ifdef UART_DEBUG_MANAGER_BOOT
 			UART_DEBUG_MANAGER_send_STR2((unsigned char *)"******* LOADING SHIELD FROM POSITION ",1); //it send a string through the UART only if is in debug mode
 			UART_DEBUG_send_NUM_BYTE_HEX((unsigned char)i, 0);
 			UART_DEBUG_MANAGER_send_STR2((unsigned char *)" EEPROM *******",0);
@@ -136,7 +136,7 @@ void 	manager_load_shields(void){
 			//for first it check if the ID is an valid ID otherwise skip
 			tempID = eeprom_read_byte((unsigned char *)((START_ADDRESS_WHERE_TO_CONFIGURATIONS_SHIELD)+(i*NUM_BYTE_EEPROM_USED_BY_EACH_SHIELD)));
 			
-//			#ifdef UART_DEBUG_MANAGER
+//			#ifdef UART_DEBUG_MANAGER_BOOT
 //			UART_DEBUG_MANAGER_send_STR2((unsigned char *)"     ADDRESS=",1);
 //			UART_DEBUG_send_NUM_BYTE_HEX((unsigned char)((START_ADDRESS_WHERE_TO_CONFIGURATIONS_SHIELD)+(i*NUM_BYTE_EEPROM_USED_BY_EACH_SHIELD)), 0);
 //			UART_DEBUG_MANAGER_send_STR2((unsigned char *)"     DATA=",0);
@@ -146,7 +146,7 @@ void 	manager_load_shields(void){
 			tempID = tempID << 8;
 			tempID |= eeprom_read_byte((unsigned char *)((START_ADDRESS_WHERE_TO_CONFIGURATIONS_SHIELD+1)+(i*NUM_BYTE_EEPROM_USED_BY_EACH_SHIELD)));
 			
-//			#ifdef UART_DEBUG_MANAGER
+//			#ifdef UART_DEBUG_MANAGER_BOOT
 //			UART_DEBUG_MANAGER_send_STR2((unsigned char *)"     ADDRESS=",1);
 //			UART_DEBUG_send_NUM_BYTE_HEX((unsigned char)((START_ADDRESS_WHERE_TO_CONFIGURATIONS_SHIELD+1)+(i*NUM_BYTE_EEPROM_USED_BY_EACH_SHIELD)), 0);
 //			UART_DEBUG_MANAGER_send_STR2((unsigned char *)"     DATA=",0);
@@ -170,7 +170,7 @@ void 	manager_load_shields(void){
 				//current_settings_shield->ID |= eeprom_read_byte((unsigned char *)((START_ADDRESS_WHERE_TO_CONFIGURATIONS_SHIELD+1)+(i*NUM_BYTE_EEPROM_USED_BY_EACH_SHIELD)));
 				current_settings_shield->ID = tempID;
 				
-				#ifdef UART_DEBUG_MANAGER
+				#ifdef UART_DEBUG_MANAGER_BOOT
 				UART_DEBUG_MANAGER_send_STR2((unsigned char *)"      ID SHIELD LOADED: ",1);
 				UART_DEBUG_send_NUM_BYTE_HEX((unsigned char)current_settings_shield->ID, 0);
 				#endif
@@ -180,7 +180,7 @@ void 	manager_load_shields(void){
 				current_settings_shield->PULL_UP = (unsigned char)eeprom_read_byte((unsigned char *)((START_ADDRESS_WHERE_TO_CONFIGURATIONS_SHIELD+4)+(i*NUM_BYTE_EEPROM_USED_BY_EACH_SHIELD)));
 				
 				
-				#ifdef UART_DEBUG_MANAGER
+				#ifdef UART_DEBUG_MANAGER_BOOT
 				UART_DEBUG_MANAGER_send_STR2((unsigned char *)"      PIN_USED=",1); //it send a string through the UART only if is in debug mode
 				UART_DEBUG_send_NUM_BYTE_HEX((unsigned char)current_settings_shield->PIN_USED, 0);
 				UART_DEBUG_MANAGER_send_STR2((unsigned char *)"      PIN_MASK=",1); //it send a string through the UART only if is in debug mode
@@ -194,7 +194,7 @@ void 	manager_load_shields(void){
 					current_settings_shield->array_ID_Functions[j] = (unsigned char)eeprom_read_byte((unsigned char *)((START_ADDRESS_WHERE_TO_CONFIGURATIONS_SHIELD+5+j)+(i*NUM_BYTE_EEPROM_USED_BY_EACH_SHIELD)));
 					if(current_settings_shield->array_ID_Functions[j]==0xFF) current_settings_shield->array_ID_Functions[j] = 0;
 					
-					#ifdef UART_DEBUG_MANAGER
+					#ifdef UART_DEBUG_MANAGER_BOOT
 					UART_DEBUG_MANAGER_send_STR2((unsigned char *)"      ID_FUNCTION",1); //it send a string through the UART only if is in debug mode
 					UART_DEBUG_send_NUM_BYTE_HEX((unsigned char)j, 0);
 					UART_DEBUG_MANAGER_send_STR2((unsigned char *)"=",0);
@@ -204,7 +204,7 @@ void 	manager_load_shields(void){
 				}				
 			}
 			
-			#ifdef UART_DEBUG_MANAGER
+			#ifdef UART_DEBUG_MANAGER_BOOT
 			UART_DEBUG_MANAGER_send_STR2((unsigned char *)"*",1);
 			UART_DEBUG_send_STARS(74);
 			#endif
@@ -215,7 +215,7 @@ void 	manager_load_shields(void){
 	
 	
 	
-	#ifdef UART_DEBUG_MANAGER
+	#ifdef UART_DEBUG_MANAGER_BOOT
 	UART_DEBUG_MANAGER_send_STR2((unsigned char *)" Configuring pinout:\n",1); //it send a string through the UART only if is in debug mode
 	#endif
 	
@@ -240,7 +240,7 @@ void 	manager_load_shields(void){
 					
 					if( (root_pin_functions->PIN_STATUS & 0b00000001) != 0 ) PIN3_SET_ON; //turn ON the pin
 
-					#ifdef UART_DEBUG_MANAGER
+					#ifdef UART_DEBUG_MANAGER_BOOT
 					UART_DEBUG_MANAGER_send_STR2((unsigned char *)"  PIN3 OUT",1); //it send a string through the UART only if is in debug mode
 					#endif
 			}else{
@@ -252,7 +252,7 @@ void 	manager_load_shields(void){
 			}
 		}
 		
-		#ifndef UART_DEBUG_MANAGER
+		#ifndef UART_DEBUG_MANAGER_BOOT
 		if( (current_settings_shield->PIN_USED & 0b00000010) != 0 ){//this pin is used: PIN4 = PD0		PIN_USED=0b00000010
 			root_pin_functions->PIN_USED |= 0b00000010;
 			if( (current_settings_shield->PIN_MASK & 0b00000010) != 0 ){
@@ -279,7 +279,7 @@ void 	manager_load_shields(void){
 					
 					if( (root_pin_functions->PIN_STATUS & 0b00000100) != 0 ) PIN5_SET_ON; //turn ON the pin
 					
-					#ifdef UART_DEBUG_MANAGER
+					#ifdef UART_DEBUG_MANAGER_BOOT
 					UART_DEBUG_MANAGER_send_STR2((unsigned char *)"  PIN5 OUT",1); //it send a string through the UART only if is in debug mode
 					#endif
 			}else{
@@ -299,7 +299,7 @@ void 	manager_load_shields(void){
 					
 					if( (root_pin_functions->PIN_STATUS & 0b00001000) != 0 ) PIN6_SET_ON; //turn ON the pin
 					
-					#ifdef UART_DEBUG_MANAGER
+					#ifdef UART_DEBUG_MANAGER_BOOT
 					UART_DEBUG_MANAGER_send_STR2((unsigned char *)"  PIN6 OUT",1); //it send a string through the UART only if is in debug mode
 					#endif
 			}else{
@@ -319,7 +319,7 @@ void 	manager_load_shields(void){
 					
 					if( (root_pin_functions->PIN_STATUS & 0b00010000) != 0 ) PIN7_SET_ON; //turn ON the pin
 					
-					#ifdef UART_DEBUG_MANAGER
+					#ifdef UART_DEBUG_MANAGER_BOOT
 					UART_DEBUG_MANAGER_send_STR2((unsigned char *)"  PIN7 OUT",1); //it send a string through the UART only if is in debug mode
 					#endif
 			}else{
@@ -331,7 +331,7 @@ void 	manager_load_shields(void){
 			}
 		}
 		
-		#ifndef UART_DEBUG_MANAGER
+		#ifndef UART_DEBUG_MANAGER_BOOT
 		if( (current_settings_shield->PIN_USED & 0b00100000) != 0 ){//this pin is used: PIN8 = PD1		PIN_USED=0b00100000
 			root_pin_functions->PIN_USED |= 0b00100000;
 			if( (current_settings_shield->PIN_MASK & 0b00100000) != 0 ){
@@ -358,7 +358,7 @@ void 	manager_load_shields(void){
 					
 					if( (root_pin_functions->PIN_STATUS & 0b01000000) != 0 ) PIN9_SET_ON; //turn ON the pin
 					
-					#ifdef UART_DEBUG_MANAGER
+					#ifdef UART_DEBUG_MANAGER_BOOT
 					UART_DEBUG_MANAGER_send_STR2((unsigned char *)"  PIN9 OUT",1); //it send a string through the UART only if is in debug mode
 					#endif
 			}else{
@@ -378,7 +378,7 @@ void 	manager_load_shields(void){
 					
 					if( (root_pin_functions->PIN_STATUS & 0b10000000) != 0 ) PIN10_SET_ON; //turn ON the pin
 					
-					#ifdef UART_DEBUG_MANAGER
+					#ifdef UART_DEBUG_MANAGER_BOOT
 					UART_DEBUG_MANAGER_send_STR2((unsigned char *)"  PIN10 OUT",1); //it send a string through the UART only if is in debug mode
 					#endif
 			}else{
@@ -401,7 +401,7 @@ void 	manager_load_shields(void){
 		current_settings_shield = current_settings_shield->next;
 	}
 	
-	#ifdef UART_DEBUG_MANAGER
+	#ifdef UART_DEBUG_MANAGER_BOOT
 	//UART_DEBUG_MANAGER_send_STR2((unsigned char *)"PIN_MASK=",1); //it send a string through the UART only if is in debug mode
 	//UART_DEBUG_send_NUM_BYTE_HEX((unsigned char)root_pin_functions->PIN_MASK, 0);
 	#endif
@@ -465,8 +465,9 @@ void check_and_parse_functions_manager_shield_every_1mS(void){
 void check_and_parse_functions_manager(void){
 	
 	unsigned char array_cmd2[16];
-	unsigned char ii;//,l;
-	
+	unsigned char ii;
+	unsigned char ll;
+
 	//variabili usate per Input Duty
 	unsigned char temp_input_trigger;
 	unsigned char temp_id_input;
@@ -479,6 +480,12 @@ void check_and_parse_functions_manager(void){
 	
 	unsigned char data[16];
 	
+	unsigned int u16_temp_value_threshold_low;
+	unsigned int u16_temp_value_threshold_high;
+	unsigned int u16_temp_value_pin;
+
+	unsigned long u32TempVar;
+
 	
 	if(decont_check_and_parse_functions_manager == 0){
 		decont_check_and_parse_functions_manager = MAX_DELAY_RUN_MANAGER_FUNCTION; //ogni circa 50mS esegue una funzione
@@ -607,6 +614,10 @@ void check_and_parse_functions_manager(void){
 			if( (id_data_eeprom_to_update & 0b0000000100000000) != 0){	//it update the PWM of PIN3 (led BLUE)
 				eeprom_write_byte ((unsigned char *)(START_ADDRESS_SETTINGS_PLATFORM), sem_Led_TX_keep_OFF);
 			}
+			if( (id_data_eeprom_to_update & 0b0000001000000000) != 0){	//it update into the EEPROM the values for THRESHOLD0 and THRESHOLD1
+				for(ii=0;ii<10;ii++)
+					eeprom_write_byte ((unsigned char *)(START_ADDRESS_THRESHOLD_VALUES+ii), fun_threshold_ctrl_output[ii]);
+			}
 		
 			id_data_eeprom_to_update = 0;
 		
@@ -622,11 +633,11 @@ void check_and_parse_functions_manager(void){
 				//ADC4_Average = get_average_ADC((unsigned int *)&ADC4_Average_Array[0], (unsigned char *)&contSampleADC4, (unsigned char *)&NUM_MAX_SAMPLE_ADC4, (unsigned char *)&NUM_ADC4);
 				ADC4_Average = get_10bit_adc(NUM_ADC4);
 				
-				#ifdef UART_DEBUG_MANAGER
+				#ifdef UART_DEBUG_MANAGER_PARSE_FUNCTIONS
 				//UART_DEBUG_MANAGER_send_STR2((unsigned char *)"get_average_ADC4.....",1); //it send a string through the UART only if is in debug mode
 				#endif
 			}
-			#ifdef UART_DEBUG_MANAGER
+			#ifdef UART_DEBUG_MANAGER_PARSE_FUNCTIONS
 			//UART_DEBUG_MANAGER_send_STR2((unsigned char *)"SEM_ADC=",1); //it send a string through the UART only if is in debug mode
 			//UART_DEBUG_send_NUM_BYTE_HEX((unsigned char)root_pin_functions->SEM_ADC, 0);
 			#endif
@@ -660,7 +671,175 @@ void check_and_parse_functions_manager(void){
 			//Led_TX_OFF_and_after_delay_turn_ON();
 			
 			
-		//}else if(ID_Function_Manager_to_Run==7){	
+	}else if( 	(ID_Function_Manager_to_Run == ID_FUNCTION_MANAGER_THRESHOLD0)
+				|| (ID_Function_Manager_to_Run == ID_FUNCTION_MANAGER_THRESHOLD1)
+			){	//qui intendo eseguire la funzione threshold0-1 su di un output esistente con un input analogico
+
+			//fun_threshold_ctrl_output[10];	//this has the Values on 16bits that are the threshold to control an output
+
+			// Byte and Bits meaning inside fun_threshold_ctrl_output[] from byte 0 to byte 9
+			// ------------------- BYTE0	=	ID INPUT-OUTPUT FOR THRESHOLD0 -----------------------
+			//		B0:bit0 (LSB) 	to	 B0:bit2 (MSB)	=	ID of the input that control the output
+			//		B0:bit3 (LSB) 	to	 B0:bit5 (MSB)	=	ID of the output to control
+			//		B0:bit6 (LSB) 	to	 B0:bit7 (MSB)	=	Way to control output:
+			//											___________________________________________________________________
+			//											| VALUE bit6-bit7		< LOW THRESHOLD0		> HIGH THRESHOLD0 |
+			//											|_________________________________________________________________|
+			//											|		0x0 			SET OUT LOW 			SET OUT HIGH	  |
+			//											|		0x1 			SET OUT HIGH 			SET OUT LOW		  |
+			//											|		0x2				FUNCTION DISABLED		FUNCTION DISABLED |
+			//											|_________________________________________________________________|
+			// ---------------------------------------------------------------------------------------
+			// ------------------- BYTE1+BYTE2	=	HIGH THRESHOLD0 ----------------------------------
+			//		B1:bit0 (LSB),	B1:bit1,	......	B2:bit6,	B2:bit7 (MSB)
+			// ---------------------------------------------------------------------------------------
+			// ------------------- BYTE3+BYTE4	=	LOW THRESHOLD0 ----------------------------------
+			//		B3:bit0 (LSB),	B3:bit1,	......	B4:bit6,	B4:bit7 (MSB)
+			// ---------------------------------------------------------------------------------------
+
+			// ------------------- BYTE5	=	ID INPUT-OUTPUT FOR THRESHOLD1 -----------------------
+			//		B5:bit0 (LSB) 	to	 B5:bit2 (MSB)	=	ID of the input that control the output
+			//		B5:bit3 (LSB) 	to	 B5:bit5 (MSB)	=	ID of the output to control
+			//		B5:bit6 (LSB) 	to	 B5:bit7 (MSB)	=	Way to control output:
+			//											___________________________________________________________________
+			//											| VALUE bit6-bit7		< LOW THRESHOLD1		> HIGH THRESHOLD1 |
+			//											|_________________________________________________________________|
+			//											|		0x0 			SET OUT LOW 			SET OUT HIGH	  |
+			//											|		0x1 			SET OUT HIGH 			SET OUT LOW		  |
+			//											|		0x2				FUNCTION DISABLED		FUNCTION DISABLED |
+			//											|_________________________________________________________________|
+			// ---------------------------------------------------------------------------------------
+			// ------------------- BYTE6+BYTE7	=	HIGH THRESHOLD1 ----------------------------------
+			//		B6:bit0 (LSB),	B6:bit1,	......	B7:bit6,	B7:bit7 (MSB)
+			// ---------------------------------------------------------------------------------------
+			// ------------------- BYTE8+BYTE9	=	LOW THRESHOLD1 -----------------------------------
+			//		B8:bit0 (LSB),	B8:bit1,	......	B9:bit6,	B9:bit7 (MSB)
+			// ---------------------------------------------------------------------------------------
+
+			if(var_NUM_DIGITAL_OUTPUT>0){
+				//for(ii=0;ii<2 && ii<var_NUM_DIGITAL_OUTPUT;ii++){//I have 2 function to check that works with threshold
+				ii = ID_Function_Manager_to_Run - ID_FUNCTION_MANAGER_THRESHOLD0; // selects the bytes to do the controls
+					ll = (unsigned char)(ii*5); //index byte0
+					temp_status_output_to_set = (unsigned char)((fun_threshold_ctrl_output[ll] >> 6) & 0x03); // I get the way to control the output or if it is disabled with value 0x3
+					if(	temp_status_output_to_set != 0x03 ){ // if the function is NOT DISABLED then I check LOW and HIGH THRESHOLDS
+						temp_id_input = (unsigned char)(fun_threshold_ctrl_output[ll] & 0b00000111); // I get the input ID that control the output
+						//per sapere il valore fisico del pin corrispondente, estraggo il numero di pin relativo all'ID e poi ne leggo il valore
+						temp_num_pin_input = num_pin_iotgemini_from_id_input(temp_id_input);
+						return_value_pin(temp_num_pin_input, data);
+
+						#ifdef UART_DEBUG_MANAGER_FUNCTIONS_THRESHOLDS
+						UART_DEBUG_MANAGER_send_STR2((unsigned char *)"***",1);
+						UART_DEBUG_MANAGER_send_STR2((unsigned char *)" THRESHOLDS: ",1);
+						UART_DEBUG_MANAGER_send_STR2((unsigned char *)" ID INPUT = ",0);
+						UART_DEBUG_send_NUM_BYTE_HEX((unsigned char)temp_id_input & 0xFF, 0);
+						UART_DEBUG_MANAGER_send_STR2((unsigned char *)"  PIN INPUT = ",0);
+						UART_DEBUG_send_NUM_BYTE_HEX((unsigned char)temp_num_pin_input & 0xFF, 0);
+						#endif
+
+						//because I always check on 16bits I compare the 16bits stored into the EEPROM (fun_threshold_ctrl_output[]) with the data[6] and data[7]
+						ll++; //index byte1 = LSB HIGH THRESHOLD x
+						u16_temp_value_threshold_low = (unsigned int)fun_threshold_ctrl_output[ll];
+						u16_temp_value_threshold_low &= 0x00FF;
+						ll++; //index byte2 = MSB HIGH THRESHOLD x
+						u16_temp_value_threshold_low |= (unsigned int)(fun_threshold_ctrl_output[ll] << 8);
+
+						ll++; //index byte3 = LSB LOW THRESHOLD x
+						u16_temp_value_threshold_high = (unsigned int)fun_threshold_ctrl_output[ll];
+						u16_temp_value_threshold_high &= 0x00FF;
+						ll++; //index byte4 = MSB LOW THRESHOLD x
+						u16_temp_value_threshold_high |= (unsigned int)(fun_threshold_ctrl_output[ll] << 8);
+
+						//data[5] == 32 then is the DHT11 // inside data[5] there is written how many bits take the value of the input
+						if( (data[5] == 32) && (ii == 1) && ((fun_threshold_ctrl_output[0] & 0x3) == (fun_threshold_ctrl_output[5] & 0x3)) ){
+							//it is the DHT11 where data[6] and data[7] is the umidity and data[8] and data[9] is the temperature
+							//thus if ID input is same for bot THRESHOLD0 and THRESHOLD1 then THRESHOLD0 is for umidity and THRESHOLD1 for temperature
+							u16_temp_value_pin = (unsigned int)data[9];
+							u16_temp_value_pin &= 0x00FF;
+							u16_temp_value_pin |= (unsigned int)(data[8] << 8);
+						}else{
+							u16_temp_value_pin = (unsigned int)data[7];
+							u16_temp_value_pin &= 0x00FF;
+							u16_temp_value_pin |= (unsigned int)(data[6] << 8);
+						}
+						if(cont_input_values_threshold_fun[ii] > 2){
+							cont_input_values_threshold_fun[ii] = 0;
+						}else{
+							cont_input_values_threshold_fun[ii]++;
+						}
+						input_values_threshold_fun[ii][cont_input_values_threshold_fun[ii]] = u16_temp_value_pin; //recording the values
+						//going to do average
+						u32TempVar = 0;
+						for(ll=0;ll<4;ll++){
+							u32TempVar += input_values_threshold_fun[ii][ll];
+						}
+						u32TempVar /= 4;
+						u16_temp_value_pin = (unsigned int) u32TempVar;
+
+
+						#ifdef UART_DEBUG_MANAGER_FUNCTIONS_THRESHOLDS
+						UART_DEBUG_MANAGER_send_STR2((unsigned char *)" THRESHOLDS: ",1);
+						UART_DEBUG_MANAGER_send_STR2((unsigned char *)" THRESHOLD LOW = ",0); //it send a string through the UART only if is in debug mode
+						UART_DEBUG_send_NUM_BYTE_HEX((unsigned char)(u16_temp_value_threshold_low >> 8) & 0xFF, 0);
+						UART_DEBUG_MANAGER_send_STR2((unsigned char *)" ",0);
+						UART_DEBUG_send_NUM_BYTE_HEX((unsigned char)u16_temp_value_threshold_low & 0xFF, 0);
+						UART_DEBUG_MANAGER_send_STR2((unsigned char *)" THRESHOLD HIGH = ",0); //it send a string through the UART only if is in debug mode
+						UART_DEBUG_send_NUM_BYTE_HEX((unsigned char)(u16_temp_value_threshold_high >> 8) & 0xFF, 0);
+						UART_DEBUG_MANAGER_send_STR2((unsigned char *)" ",0);
+						UART_DEBUG_send_NUM_BYTE_HEX((unsigned char)u16_temp_value_threshold_high & 0xFF, 0);
+						//UART_DEBUG_send_STARS(3);
+						UART_DEBUG_MANAGER_send_STR2((unsigned char *)" VALUE PIN = ",0); //it send a string through the UART only if is in debug mode
+						UART_DEBUG_send_NUM_BYTE_HEX((unsigned char)(u16_temp_value_pin >> 8) & 0xFF, 0);
+						UART_DEBUG_MANAGER_send_STR2((unsigned char *)" ",0);
+						UART_DEBUG_send_NUM_BYTE_HEX((unsigned char)u16_temp_value_pin & 0xFF, 0);
+						#endif
+
+						ll = (unsigned char)(ii*5); //index byte0
+						array_cmd2[7] = (unsigned char)((fun_threshold_ctrl_output[ll] >> 3) & 0x07); //set ID output to control
+						array_cmd2[9] = (unsigned char)24;//this for the RGB
+
+						if(u16_temp_value_pin < u16_temp_value_threshold_low){ //check if value input is under LOW THRESHOLD
+							if(temp_status_output_to_set==1){ //SET OUTPUT TO LOW
+								array_cmd2[8]=0; //set off
+								array_cmd2[10]=array_cmd2[11]=array_cmd2[12]=0; //for RGB
+								#ifdef UART_DEBUG_MANAGER_FUNCTIONS_THRESHOLDS
+								UART_DEBUG_MANAGER_send_STR2((unsigned char *)" -> BELOW LOW THEN SET OFF ",0);
+								#endif
+							}else if(temp_status_output_to_set==2){ //SET OUTPUT TO HIGH
+								array_cmd2[8]=1; //set on
+								array_cmd2[10]=array_cmd2[11]=array_cmd2[12]=255; //for RGB
+								#ifdef UART_DEBUG_MANAGER_FUNCTIONS_THRESHOLDS
+								UART_DEBUG_MANAGER_send_STR2((unsigned char *)" -> BELOW LOW THEN SET ON ",0);
+								#endif
+							}
+						}else if(u16_temp_value_pin > u16_temp_value_threshold_high){ //check if value input is above HIGH THRESHOLD
+							if(temp_status_output_to_set==1){ //SET OUTPUT TO HIGH
+								array_cmd2[8]=1; //set on
+								array_cmd2[10]=array_cmd2[11]=array_cmd2[12]=255; //for RGB
+								#ifdef UART_DEBUG_MANAGER_FUNCTIONS_THRESHOLDS
+								UART_DEBUG_MANAGER_send_STR2((unsigned char *)" -> ABOVE HIGH THEN SET ON ",0);
+								#endif
+							}else if(temp_status_output_to_set==2){ //SET OUTPUT TO LOW
+								array_cmd2[8]=0; //set off
+								array_cmd2[10]=array_cmd2[11]=array_cmd2[12]=0; //for RGB
+								#ifdef UART_DEBUG_MANAGER_FUNCTIONS_THRESHOLDS
+								UART_DEBUG_MANAGER_send_STR2((unsigned char *)" -> ABOVE HIGH THEN SET OFF ",0);
+								#endif
+							}
+						}
+						ll = (unsigned char)(ii+10); //index byte10 for THRESHOLD0 and byte11 for THRESHOLD1
+						if(fun_threshold_ctrl_output[ll] != array_cmd2[8]){ //the last 2 bytes of the vector fun_threshold_ctrl_output[] are used as flag to remeber the last status of the output
+							fun_threshold_ctrl_output[ll] = array_cmd2[8]; //saving last status thus it will not keep send via radio the status of the output with the following function o_SetOut()
+							o_SetOut(array_cmd2,1);		//Function to set the status of an output
+						}
+						#ifdef UART_DEBUG_MANAGER_FUNCTIONS_THRESHOLDS
+						UART_DEBUG_MANAGER_send_STR2((unsigned char *)"***",1);
+						#endif
+					}
+				//}
+			}
+
+
+		//}else if(ID_Function_Manager_to_Run==9){	//free
 
 			
 		}else{
@@ -686,7 +865,7 @@ void check_and_parse_functions_manager(void){
 		if( (semRelayTimer & 0b00111111) > 0 ){ //BEGIN TIMER
 			//if( last_cont_Timer_Manager_Shield_SS != cont_Timer_Manager_Shield_SS ){ //if the timer is enabled  then decrement all variables
 			//	last_cont_Timer_Manager_Shield_SS = cont_Timer_Manager_Shield_SS;
-			if( last_cont_Timer_Manager_Shield_SS != cont_Timer_Manager_Shield_SS ){ //if the timer is enabled  then decrement all variables
+			if( last_cont_Timer_Manager_Shield_10ms != cont_Timer_Manager_Shield_10ms ){ //if the timer is enabled  then decrement all variables
 				last_cont_Timer_Manager_Shield_10ms = cont_Timer_Manager_Shield_10ms;
 				if(decont_RelayTimer_10ms > 0){
 					decont_RelayTimer_10ms--;
@@ -732,7 +911,7 @@ void check_and_parse_functions_manager(void){
 void lib_shields(struct settings_shield *current_shield_settings, unsigned char function_to_run){
 	if(current_shield_settings->ID == 1){ //LED digital output
 		if(function_to_run == 0){ //setup that is executed on boot
-			#ifdef UART_DEBUG_MANAGER
+			#ifdef UART_DEBUG_MANAGER_LIB_SHIELD
 			UART_DEBUG_MANAGER_send_STR2((unsigned char *)"Init variables for shield LED ID=1",1); //it send a string through the UART only if is in debug mode
 			#endif
 			init_led_1();					//Function that allocate the variables and init the shield
@@ -742,7 +921,7 @@ void lib_shields(struct settings_shield *current_shield_settings, unsigned char 
 		}
 	}else if(current_shield_settings->ID == 2 || current_shield_settings->ID == 7){ //BUTTON digital input
 		if(function_to_run == 0){ //setup that is executed on boot
-			#ifdef UART_DEBUG_MANAGER
+			#ifdef UART_DEBUG_MANAGER_LIB_SHIELD
 			UART_DEBUG_MANAGER_send_STR2((unsigned char *)"Init variables for shield BUTTON ID=2/7",1); //it send a string through the UART only if is in debug mode
 			#endif
 			init_button_2(current_shield_settings);					//Function that allocate the variables and init the shield
@@ -755,7 +934,7 @@ void lib_shields(struct settings_shield *current_shield_settings, unsigned char 
 				|| current_shield_settings->ID == 9
 				){ //SENSOR analogue input
 		if(function_to_run == 0){ //setup that is executed on boot
-			#ifdef UART_DEBUG_MANAGER
+			#ifdef UART_DEBUG_MANAGER_LIB_SHIELD
 			UART_DEBUG_MANAGER_send_STR2((unsigned char *)"Init variables for shield SENSOR ID=3/6/9",1); //it send a string through the UART only if is in debug mode
 			#endif
 			init_SENSOR_3(current_shield_settings);					//Function that allocate the variables and init the shield
@@ -765,7 +944,7 @@ void lib_shields(struct settings_shield *current_shield_settings, unsigned char 
 		}
 	}else if(current_shield_settings->ID == 4){ //RGB LED
 		if(function_to_run == 0){ //setup that is executed on boot
-			#ifdef UART_DEBUG_MANAGER
+			#ifdef UART_DEBUG_MANAGER_LIB_SHIELD
 			UART_DEBUG_MANAGER_send_STR2((unsigned char *)"Init variables for shield RGB ID=4",1); //it send a string through the UART only if is in debug mode
 			#endif
 			init_RGB_4(current_shield_settings);					//Function that allocate the variables and init the shield
@@ -775,7 +954,7 @@ void lib_shields(struct settings_shield *current_shield_settings, unsigned char 
 		}
 	}else if(current_shield_settings->ID == 5 || current_shield_settings->ID == 8){ //DHT11 and DHT22
 		if(function_to_run == 0){ //setup that is executed on boot
-			#ifdef UART_DEBUG_MANAGER
+			#ifdef UART_DEBUG_MANAGER_LIB_SHIELD
 			UART_DEBUG_MANAGER_send_STR2((unsigned char *)"Init variables for shield DHT11-DHT22 ID=5",1); //it send a string through the UART only if is in debug mode
 			#endif
 			init_DHT11_5(current_shield_settings);					//Function that allocate the variables and init the shield
@@ -787,32 +966,3 @@ void lib_shields(struct settings_shield *current_shield_settings, unsigned char 
 	
 }
 
-
-//it send a string through the UART only if is in debug mode
-#ifdef UART_DEBUG_MANAGER
-void 	UART_DEBUG_MANAGER_send_STR(unsigned char num_data, unsigned char *data, unsigned char line_feed){
-	unsigned char i;
-
-	if(line_feed==1){
-		USART_SendByte(0x0D); //carriage return
-		USART_SendByte(0x0A); //line feed
-		USART_SendByte('(');USART_SendByte('M');USART_SendByte('A');USART_SendByte('N');USART_SendByte('A');USART_SendByte('G');USART_SendByte('E');USART_SendByte('R');USART_SendByte(')');
-	}
-	for(i=0;i<num_data;i++){
-		USART_SendByte((unsigned char)*(data+i));
-	}	
-}
-void 	UART_DEBUG_MANAGER_send_STR2(unsigned char *data, unsigned char line_feed){
-	unsigned char i;
-	unsigned char num_data=strlen(data);
-	if(line_feed==1){
-		USART_SendByte(0x0D); //carriage return
-		USART_SendByte(0x0A); //line feed
-		USART_SendByte('(');USART_SendByte('M');USART_SendByte('A');USART_SendByte('N');USART_SendByte('A');USART_SendByte('G');USART_SendByte('E');USART_SendByte('R');USART_SendByte(')');
-	}
-	for(i=0;i<num_data;i++){
-		USART_SendByte((unsigned char)*(data+i));
-	}	
-
-}
-#endif

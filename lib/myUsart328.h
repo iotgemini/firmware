@@ -25,6 +25,7 @@
 *****************************************************************/
 
 
+#define USART_BAUDRATE 		57600
 
 //Importante: bisogna cambiare la frequenza F_CPU definita qui sotto 
 //in modo che sia uguale a quella usata sul microcontrollore

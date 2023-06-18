@@ -29,7 +29,11 @@
 *****************************************************************/
 
 #ifdef UART_DEBUG
-	#define UART_DEBUG_MANAGER //activate the debug on the UART for this library
+	#define UART_DEBUG_MANAGER 								//activate the debug on the UART for this library
+	//#define	UART_DEBUG_MANAGER_BOOT							//activate the debug for BOOT
+	//#define	UART_DEBUG_MANAGER_PARSE_FUNCTIONS				//activate the debug for the function check_and_parse_functions_manager(void)
+	//#define	UART_DEBUG_MANAGER_LIB_SHIELD					//activate the debug for the function void lib_shields(struct settings_shield *current_shield_settings, unsigned char function_to_run)
+	#define UART_DEBUG_MANAGER_FUNCTIONS_THRESHOLDS			//activate the debug for thresholds functions inside the function function check_and_parse_functions_manager(void)
 #endif
 
 
@@ -40,6 +44,12 @@
 #define NUM_BYTE_EEPROM_USED_BY_EACH_SHIELD		12		//
 
 #define MAX_DELAY_RUN_MANAGER_FUNCTION			15 		//dato moltipliacato per 10. con valore di 5 allora ogni circa 50mS esegue una funzione
+
+
+//LIST OF FUNCTION
+#define ID_FUNCTION_MANAGER_THRESHOLD0			7		//qui intendo eseguire la funzione threshold0 su di un output esistente con un input analogico
+#define ID_FUNCTION_MANAGER_THRESHOLD1			8		//qui intendo eseguire la funzione threshold1 su di un output esistente con un input analogico
+
 
 //---------------------------------------------------------------------------------
 //	BEGIN GLOBAL VARIABLES
@@ -159,7 +169,7 @@ volatile unsigned char last_cont_10ms_function_manager;
 
 
 //variable that make the infinite loop to execute for every cycle only one function per time
-volatile unsigned char ID_Function_Manager_to_Run;
+static unsigned char ID_Function_Manager_to_Run;
 
 
 //variables used into lib RFPIMCU
@@ -188,6 +198,12 @@ volatile unsigned char last_cont_Timer_Manager_Shield_10ms;
 volatile unsigned char fun_input_ctrl_output[10];
 volatile unsigned char last_status_input;
 
+//used for the function 7 and 8 that is digital output controlled by THRESHOLD0 and THRESHOLD1
+volatile unsigned char fun_threshold_ctrl_output[12];	//this has the Values on 16bits that are the threshold to control an output
+//Matrix to do average of the input value acquired
+volatile unsigned int	input_values_threshold_fun[2][4];
+volatile unsigned char 	cont_input_values_threshold_fun[2];
+
 //---------------------------------------------------------------------------------
 //	END GLOBAL VARIABLES
 //---------------------------------------------------------------------------------
@@ -204,12 +220,6 @@ void 			check_and_parse_functions_manager(void); //functions for the PIN to put 
 
 void 			lib_shields(struct settings_shield *current_shield_settings, unsigned char function_to_run); //functions of the shields libraries
 
-
-#ifdef UART_DEBUG_MANAGER
-void 	UART_DEBUG_MANAGER_send_STR(unsigned char num_data, unsigned char *data, unsigned char line_feed);//it send a string through the UART only if is in debug mode
-void 	UART_DEBUG_MANAGER_send_STR2(unsigned char *data, unsigned char line_feed);
-
-#endif
 //---------------------------------------------------------------------------------
 //	END LIST FUNCTIONS
 //---------------------------------------------------------------------------------

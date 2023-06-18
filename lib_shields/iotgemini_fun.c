@@ -57,14 +57,14 @@ unsigned char num_pin_iotgemini_from_id_input(unsigned char id_io){
 
 	if( ((root_pin_functions->SEM_DHT11 & 0b00000001) != 0) && (num_pin_to_send_status == 2) ){ //check if it is an analogue input
 		cont_pin++;
-		if( cont_pin > cmd_rfpi[7] ){
+		if( cont_pin > id_io ){//cmd_rfpi[7] ){
 			num_pin_to_send_status=3;
 		}
 	}
 	
 	if( ((root_pin_functions->SEM_DHT11 & 0b00000010) != 0) && (num_pin_to_send_status == 2) ){ //check if it is an analogue input
 		cont_pin++;
-		if( cont_pin > cmd_rfpi[7] ){
+		if( cont_pin > id_io ){//cmd_rfpi[7] ){
 			num_pin_to_send_status=4;
 		}
 	}
@@ -73,14 +73,14 @@ unsigned char num_pin_iotgemini_from_id_input(unsigned char id_io){
 		 && (num_pin_to_send_status==2)
 	  ){ //check if it is an analogue input
 		cont_pin++;
-		if( cont_pin > cmd_rfpi[7] ){
+		if( cont_pin > id_io ){//cmd_rfpi[7] ){
 			num_pin_to_send_status=5;
 		}
 	}
 
 	if( ((root_pin_functions->SEM_DHT11 & 0b00001000) != 0) && (num_pin_to_send_status == 2) ){ //check if it is an analogue input
 		cont_pin++;
-		if( cont_pin > cmd_rfpi[7] ){
+		if( cont_pin > id_io ){//cmd_rfpi[7] ){
 			num_pin_to_send_status=6;
 		}
 	}
@@ -89,21 +89,21 @@ unsigned char num_pin_iotgemini_from_id_input(unsigned char id_io){
 		&& (num_pin_to_send_status==2)
 	  ){ //check if it is an analogue input
 		cont_pin++;
-		if( cont_pin > cmd_rfpi[7] ){
+		if( cont_pin > id_io ){//cmd_rfpi[7] ){
 			num_pin_to_send_status=7;
 		}
 	}
 
 	if( ((root_pin_functions->SEM_DHT11 & 0b00100000) != 0) && (num_pin_to_send_status == 2) ){ //check if it is an analogue input
 		cont_pin++;
-		if( cont_pin > cmd_rfpi[7] ){
+		if( cont_pin > id_io ){//cmd_rfpi[7] ){
 			num_pin_to_send_status=8;
 		}
 	}
 
 	if( ((root_pin_functions->SEM_DHT11 & 0b01000000) != 0) && (num_pin_to_send_status == 2) ){ //check if it is an analogue input
 		cont_pin++;
-		if( cont_pin > cmd_rfpi[7] ){
+		if( cont_pin > id_io ){//cmd_rfpi[7] ){
 			num_pin_to_send_status=9;
 		}
 	}
@@ -112,14 +112,14 @@ unsigned char num_pin_iotgemini_from_id_input(unsigned char id_io){
 		&& (num_pin_to_send_status==2)
 	  ){ //check if it is an analogue input
 		cont_pin++;
-		if( cont_pin > cmd_rfpi[7] ){
+		if( cont_pin > id_io ){//cmd_rfpi[7] ){
 			num_pin_to_send_status=10;
 		}
 	}
 
 	if( num_pin_to_send_status == 2 ){ //check if it is an analogue input
 		cont_pin++;
-		if( cont_pin > cmd_rfpi[7] ){
+		if( cont_pin > id_io ){//cmd_rfpi[7] ){
 			num_pin_to_send_status=11; //it send the MCU Volt (ADC1)
 		}
 	}
@@ -174,7 +174,7 @@ unsigned char return_value_pin(unsigned char num_pin_to_return_status, unsigned 
 	unsigned char varExit = 0;
 	unsigned char varReturn = 0; //if stay at 0 then no error occured
 	
-	data[5] = 1; //it means there are 1 bit
+	data[5] = 1; //it means there is 1 bit
 	
 	unsigned char wheight_num_pin = 0b00000001;
 	wheight_num_pin = wheight_num_pin << (num_pin_to_return_status - 3);
@@ -206,7 +206,7 @@ unsigned char return_value_pin(unsigned char num_pin_to_return_status, unsigned 
 		
 		if((root_pin_functions->SEM_PWM & 0b00000001) != 0){ //check if it is used as PWM
 			data[4] = get_duty_cycle_RED_LED();
-			data[5] = 8; //it means that is an nalogue output
+			data[5] = 8; //it means that is an analogue output
 			//data[15] = 4; //RGB //this says to the gateway the ID of the shield is connected
 		//}else if(root_pin_functions->SEM_DHT11 != 0){
 		//	data[4] = pointer_struct_DHT11->value_DHT11;

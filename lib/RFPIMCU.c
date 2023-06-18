@@ -367,7 +367,7 @@ void o_SetOut(unsigned char *array_cmd, unsigned char enable_functions){
 //Function to set the parameters of a special function
 void f_SetFunction(void){
 	
-	unsigned char i;
+	unsigned char i,l;
 	unsigned int u16_Temp;
 
 	//1st function: set parameters for the timer that control one of the output
@@ -413,18 +413,107 @@ void f_SetFunction(void){
 	//3th function: this enable/disable some features of the platform
 	if(cmd_rfpi[7] == 3){
 		//getting the settings of the platform
-		sem_Led_TX_keep_OFF = cmd_rfpi[8];
+		sem_Led_TX_keep_OFF = cmd_rfpi[8]; //get the setting for the status LED
 		PIN_LED_TX_OFF;
-
-		//trigger_temperature_low_8bit = cmd_rfpi[9]; //
-		//trigger_temperature_high_8bit = cmd_rfpi[11]; //
-		//temperature_offset_to_send_data_temperature = cmd_rfpi[13]; //
 
 		//update_eeprom_peri();
 		id_data_eeprom_to_update |= 0b0000000100000000;
 		
 	}
 	
+	//4th function: this set Values on 16bits that are the threshold to control an output
+	if(cmd_rfpi[7] == 4){
+		for(i=0;i<10;i++){
+			fun_threshold_ctrl_output[i] = cmd_rfpi[i+8];
+		}
+
+		#ifdef UART_DEBUG_MANAGER_FUNCTIONS_THRESHOLDS
+		for(i=0;i<2;i++){
+			UART_DEBUG_MANAGER_send_STR2((unsigned char *)"*",1);UART_DEBUG_send_STARS(60);
+			UART_DEBUG_MANAGER_send_STR2((unsigned char *)"*   RECEIVED FUNCTION THRESHOLD ",1); //it send a string through the UART only if it is in debug mode
+			UART_DEBUG_send_NUM_BYTE_HEX((unsigned char)i, 0); //status to set
+			UART_DEBUG_MANAGER_send_STR2((unsigned char *)"*   STATUS FUNCTION = ",1); //it send a string through the UART only if is in debug mode
+			UART_DEBUG_send_NUM_BYTE_HEX((unsigned char)fun_threshold_ctrl_output[i*5], 0); //status to set
+			UART_DEBUG_MANAGER_send_STR2((unsigned char *)"             *",0);
+			UART_DEBUG_MANAGER_send_STR2((unsigned char *)"*   THRESHOLD_0 LOW = ",1); //it send a string through the UART only if is in debug mode
+			UART_DEBUG_send_NUM_BYTE_HEX((unsigned char)fun_threshold_ctrl_output[(i*5)+2], 0); //MSB
+			UART_DEBUG_MANAGER_send_STR2((unsigned char *)" ",0);
+			UART_DEBUG_send_NUM_BYTE_HEX((unsigned char)fun_threshold_ctrl_output[(i*5)+1], 0); //LSB
+			UART_DEBUG_MANAGER_send_STR2((unsigned char *)"*   THRESHOLD HIGH_0 = ",1); //it send a string through the UART only if is in debug mode
+			UART_DEBUG_send_NUM_BYTE_HEX((unsigned char)fun_threshold_ctrl_output[(i*5)+4], 0); //MSB
+			UART_DEBUG_MANAGER_send_STR2((unsigned char *)" ",0);
+			UART_DEBUG_send_NUM_BYTE_HEX((unsigned char)fun_threshold_ctrl_output[(i*5)+3], 0); //LSB
+			UART_DEBUG_MANAGER_send_STR2((unsigned char *)"*",1);UART_DEBUG_send_STARS(60);
+		}
+		#endif
+
+		i = (unsigned char)((fun_threshold_ctrl_output[0] >> 3) & 0x07); //ID output to control of the first function
+		l = (unsigned char)((fun_threshold_ctrl_output[5] >> 3) & 0x07); //ID output to control of the second function
+		if(i == l){ //for both fuctions the output to control is same thus I am going to disable the second threshold function
+			fun_threshold_ctrl_output[5] = fun_threshold_ctrl_output[5] | 0b11000000; //disabling the second threshold fuction because both fuctions controls the same output
+			#ifdef UART_DEBUG_MANAGER_FUNCTIONS_THRESHOLDS
+			UART_DEBUG_MANAGER_send_STR2((unsigned char *)" ERROR: the 2 Thresholds Functions that controls the same output! Thus I am going to disable the second Threshold Function!",1);
+			#endif
+		}
+
+
+		// Byte and Bits meaning inside fun_threshold_ctrl_output[] from byte 0 to byte 9
+		// ------------------- BYTE0	=	ID INPUT-OUTPUT FOR THRESHOLD0 -----------------------
+		//		B0:bit0 (LSB) 	to	 B0:bit2 (MSB)	=	ID of the input that control the output
+		//		B0:bit3 (LSB) 	to	 B0:bit5 (MSB)	=	ID of the output to control
+		//		B0:bit6 (LSB) 	to	 B0:bit7 (MSB)	=	Way to control output:
+		//											___________________________________________________________________
+		//											| VALUE bit6-bit7		< LOW THRESHOLD0		> HIGH THRESHOLD0 |
+		//											|_________________________________________________________________|
+		//											|		0x0 			SET OUT LOW 			SET OUT HIGH	  |
+		//											|		0x1 			SET OUT HIGH 			SET OUT LOW		  |
+		//											|		0x2				FUNCTION DISABLED		FUNCTION DISABLED |
+		//											|_________________________________________________________________|
+		// ---------------------------------------------------------------------------------------
+		// ------------------- BYTE1+BYTE2	=	HIGH THRESHOLD0 ----------------------------------
+		//		B1:bit0 (LSB),	B1:bit1,	......	B2:bit6,	B2:bit7 (MSB)
+		// ---------------------------------------------------------------------------------------
+		// ------------------- BYTE3+BYTE4	=	LOW THRESHOLD0 ----------------------------------
+		//		B3:bit0 (LSB),	B3:bit1,	......	B4:bit6,	B4:bit7 (MSB)
+		// ---------------------------------------------------------------------------------------
+
+		// ------------------- BYTE5	=	ID INPUT-OUTPUT FOR THRESHOLD1 -----------------------
+		//		B5:bit0 (LSB) 	to	 B5:bit2 (MSB)	=	ID of the input that control the output
+		//		B5:bit3 (LSB) 	to	 B5:bit5 (MSB)	=	ID of the output to control
+		//		B5:bit6 (LSB) 	to	 B5:bit7 (MSB)	=	Way to control output:
+		//											___________________________________________________________________
+		//											| VALUE bit6-bit7		< LOW THRESHOLD1		> HIGH THRESHOLD1 |
+		//											|_________________________________________________________________|
+		//											|		0x0 			SET OUT LOW 			SET OUT HIGH	  |
+		//											|		0x1 			SET OUT HIGH 			SET OUT LOW		  |
+		//											|		0x2				FUNCTION DISABLED		FUNCTION DISABLED |
+		//											|_________________________________________________________________|
+		// ---------------------------------------------------------------------------------------
+		// ------------------- BYTE6+BYTE7	=	HIGH THRESHOLD1 ----------------------------------
+		//		B6:bit0 (LSB),	B6:bit1,	......	B7:bit6,	B7:bit7 (MSB)
+		// ---------------------------------------------------------------------------------------
+		// ------------------- BYTE8+BYTE9	=	LOW THRESHOLD1 -----------------------------------
+		//		B8:bit0 (LSB),	B8:bit1,	......	B9:bit6,	B9:bit7 (MSB)
+		// ---------------------------------------------------------------------------------------
+
+		id_data_eeprom_to_update |= 0b0000001000000000; //into the manager.c it will allow to update the eeprom with the value just gotten
+
+	}
+
+
+//	//5th function: free
+//	if(cmd_rfpi[7] == 5){
+//
+//		//EXAMPLE:
+//		//trigger_temperature_low_8bit = cmd_rfpi[9]; //
+//		//trigger_temperature_high_8bit = cmd_rfpi[11]; //
+//		//temperature_offset_to_send_data_temperature = cmd_rfpi[13]; //
+//
+//		id_data_eeprom_to_update |= 0b0000010000000000;
+//
+//	}
+
+
 	if(cmd_rfpi[7] == 254){ //ID function 254 (radio control)
 	
 		sem_address_assigned=1;
@@ -490,6 +579,16 @@ void u_SendFunctionStatus(void){
 		UART_send_and_fill_data_to_RF((unsigned char *)data, 15);
 		
 	}
+
+	//4th function: this Values on 16bits that are the threshold to control an output
+	if(cmd_rfpi[7] == 4){
+		for(i=0;i<10;i++){
+			 data[i+4] = fun_threshold_ctrl_output[i];
+		}
+		UART_send_and_fill_data_to_RF((unsigned char *)data, 14);
+
+	}else
+
 
 	if(cmd_rfpi[7] == 254){//ID function 254 (radio control)
 		data[0] = 'R';
