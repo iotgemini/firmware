@@ -229,90 +229,90 @@ unsigned char dht11_read(unsigned char wheight_pin)
 			
 			
 			// BUFFER TO RECEIVE
-		/*	uint8_t bits[5];
-			uint8_t cnt = 7;
-			uint8_t idx = 0;
-			uint8_t varExit = 0;
-			int i;
-			
-			// EMPTY BUFFER
-			for (i=0; i< 5; i++) bits[i] = 0;
-
-			// REQUEST SAMPLE
-			pinMode(wheight_pin, OUTPUT);
-			digitalWrite(wheight_pin, LOW);
-			_delay_ms(18);
-			digitalWrite(wheight_pin, HIGH);
-			delayMicroseconds(40);
-			enablePullUp(wheight_pin);
-			pinMode(wheight_pin, INPUT); 
-			enablePullUp(wheight_pin);
-
-			// ACKNOWLEDGE or TIMEOUT
-			unsigned int loopCnt = 100;
-			unsigned int tt,t;
-			while(digitalRead(wheight_pin) == LOW && varExit==0){
-					if (loopCnt-- == 0) varExit=1;//return DHTLIB_ERROR_TIMEOUT;
-			}
-			loopCnt = 100;
-			while(digitalRead(wheight_pin) == HIGH && varExit==0){
-					if (loopCnt-- == 0) varExit=2;//return DHTLIB_ERROR_TIMEOUT;
-					delayMicroseconds(1);
-			}
-
-			// READ OUTPUT - 40 BITS => 5 BYTES or TIMEOUT
-			for (i=0; i<40 && varExit==0; i++)
-			{
-					loopCnt = 100;
-					t = 0;
-					while(digitalRead(wheight_pin) == LOW && varExit==0){
-						if (loopCnt-- == 0) varExit=3;//return DHTLIB_ERROR_TIMEOUT;
-						t++;
-						delayMicroseconds(1);
-					}
-
-					//unsigned long t = micros();
-					
-					_delay_us(10);
-					
-					loopCnt = 100;
-					tt = 0;
-					while(digitalRead(wheight_pin) == HIGH && varExit==0){
-						if (loopCnt-- == 0) varExit=4;//return DHTLIB_ERROR_TIMEOUT;
-						tt++;
-						delayMicroseconds(1);
-					}
-
-					//if ((micros() - t) > 40) bits[idx] |= (1 << cnt);
-					if ((tt - t) > 40) bits[idx] |= (1 << cnt);
-					if (cnt == 0)   // next byte?
-					{
-							cnt = 7;    // restart at MSB
-							idx++;      // next byte!
-					}
-					else cnt--;
-			}
-
-			// WRITE TO RIGHT VARS
-			// as bits[1] and bits[3] are allways zero they are omitted in formulas.
-		   // humidity    = bits[0]; 
-		   // temperature = bits[2]; 
-
-
-			uint8_t sum = bits[0] + bits[2];  
-
-			if (bits[4] != sum){// || varExit>0){
-				//return DHTLIB_ERROR_CHECKSUM;
-				pointer_struct_DHT11->I_umidity[index] = wheight_pin;//varExit;
-				pointer_struct_DHT11->D_umidity[index] = 0;
-				pointer_struct_DHT11->temperature[index] = varExit;
-			}else{
-				//return DHTLIB_OK;
-				pointer_struct_DHT11->I_umidity[index] = bits[0];
-				pointer_struct_DHT11->D_umidity[index] = bits[0];
-				pointer_struct_DHT11->temperature[index] = bits[2];
-			}
-			*/
+//			uint8_t bits[5];
+//			uint8_t cnt = 7;
+//			uint8_t idx = 0;
+//			uint8_t varExit = 0;
+//			int i;
+//
+//			// EMPTY BUFFER
+//			for (i=0; i< 5; i++) bits[i] = 0;
+//
+//			// REQUEST SAMPLE
+//			pinMode(wheight_pin, OUTPUT);
+//			digitalWrite(wheight_pin, LOW);
+//			_delay_ms(18);
+//			digitalWrite(wheight_pin, HIGH);
+//			delayMicroseconds(40);
+//			enablePullUp(wheight_pin);
+//			pinMode(wheight_pin, INPUT);
+//			enablePullUp(wheight_pin);
+//
+//			// ACKNOWLEDGE or TIMEOUT
+//			unsigned int loopCnt = 100;
+//			unsigned int tt,t;
+//			while(digitalRead(wheight_pin) == LOW && varExit==0){
+//					if (loopCnt-- == 0) varExit=1;//return DHTLIB_ERROR_TIMEOUT;
+//			}
+//			loopCnt = 100;
+//			while(digitalRead(wheight_pin) == HIGH && varExit==0){
+//					if (loopCnt-- == 0) varExit=2;//return DHTLIB_ERROR_TIMEOUT;
+//					delayMicroseconds(1);
+//			}
+//
+//			// READ OUTPUT - 40 BITS => 5 BYTES or TIMEOUT
+//			for (i=0; i<40 && varExit==0; i++)
+//			{
+//					loopCnt = 100;
+//					t = 0;
+//					while(digitalRead(wheight_pin) == LOW && varExit==0){
+//						if (loopCnt-- == 0) varExit=3;//return DHTLIB_ERROR_TIMEOUT;
+//						t++;
+//						delayMicroseconds(1);
+//					}
+//
+//					//unsigned long t = micros();
+//
+//					_delay_us(10);
+//
+//					loopCnt = 100;
+//					tt = 0;
+//					while(digitalRead(wheight_pin) == HIGH && varExit==0){
+//						if (loopCnt-- == 0) varExit=4;//return DHTLIB_ERROR_TIMEOUT;
+//						tt++;
+//						delayMicroseconds(1);
+//					}
+//
+//					//if ((micros() - t) > 40) bits[idx] |= (1 << cnt);
+//					if ((tt - t) > 40) bits[idx] |= (1 << cnt);
+//					if (cnt == 0)   // next byte?
+//					{
+//							cnt = 7;    // restart at MSB
+//							idx++;      // next byte!
+//					}
+//					else cnt--;
+//			}
+//
+//			// WRITE TO RIGHT VARS
+//			// as bits[1] and bits[3] are allways zero they are omitted in formulas.
+//		   // humidity    = bits[0];
+//		   // temperature = bits[2];
+//
+//
+//			uint8_t sum = bits[0] + bits[2];
+//
+//			if (bits[4] != sum){// || varExit>0){
+//				//return DHTLIB_ERROR_CHECKSUM;
+//				pointer_struct_DHT11->I_umidity[index] = wheight_pin;//varExit;
+//				pointer_struct_DHT11->D_umidity[index] = 0;
+//				pointer_struct_DHT11->temperature[index] = varExit;
+//			}else{
+//				//return DHTLIB_OK;
+//				pointer_struct_DHT11->I_umidity[index] = bits[0];
+//				pointer_struct_DHT11->D_umidity[index] = bits[0];
+//				pointer_struct_DHT11->temperature[index] = bits[2];
+//			}
+//
 		   
 		
 	//}

@@ -28,22 +28,22 @@
 
 *****************************************************************/
 
-unsigned char checksum (unsigned char *ptr, size_t sz) {
-    //unsigned char chk = 0;
-	unsigned char sum=0;
-	unsigned char i;
-    /*while (sz-- != 0)
-        chk -= *ptr++;*/
-	for(i=0;i<(sz-1);i++){ //last byte is the byte to compare for checksum
-		sum += ptr[i];
-	}
-	if(sum != ptr[sz-1]){
-		sum=1; //erro into data!
-	}else{
-		sum=0; //DATA ALL OK!
-	}
-    return sum;
-}
+//unsigned char checksum (unsigned char *ptr, size_t sz) {
+//    //unsigned char chk = 0;
+//	unsigned char sum=0;
+//	unsigned char i;
+//    /*while (sz-- != 0)
+//        chk -= *ptr++;*/
+//	for(i=0;i<(sz-1);i++){ //last byte is the byte to compare for checksum
+//		sum += ptr[i];
+//	}
+//	if(sum != ptr[sz-1]){
+//		sum=1; //erro into data!
+//	}else{
+//		sum=0; //DATA ALL OK!
+//	}
+//    return sum;
+//}
 
 unsigned char checksum2 (unsigned char *ptr, size_t sz) {
     //unsigned char chk = 0;
@@ -65,7 +65,7 @@ unsigned char checksum2 (unsigned char *ptr, size_t sz) {
 unsigned char calc_checksum (unsigned char *ptr, size_t sz) {
 	unsigned char sum=0;
 	unsigned char i;
-	for(i=0;i<sz;i++){ 
+	for(i=0;i<sz;i++){
 		sum += ptr[i];
 	}
     return sum;
@@ -208,11 +208,13 @@ void o_SetOut(unsigned char *array_cmd, unsigned char enable_functions){
 	num_pin_to_send_status = num_pin_iotgemini_from_id_output(array_cmd[7]);
 
 	if(enable_functions>0){
-		if(array_cmd[7]==((semRelayTimer&0b00111111)-1)){
-			decont_RelayTimer_10ms = RelayTimer_10ms; //byte milli seconds divided by 10
-			decont_RelayTimer_SS = RelayTimer_SS; //byte seconds
-			decont_RelayTimer_MM = RelayTimer_MM; //byte minutes
-			decont_RelayTimer_HH = RelayTimer_HH; //byte hours
+		if((unsigned char)(semRelayTimer&0b00111111)>0){
+			if(array_cmd[7]==(unsigned char)((semRelayTimer&0b00111111)-1)){
+				decont_RelayTimer_10ms = RelayTimer_10ms; //byte milli seconds divided by 10
+				decont_RelayTimer_SS = RelayTimer_SS; //byte seconds
+				decont_RelayTimer_MM = RelayTimer_MM; //byte minutes
+				decont_RelayTimer_HH = RelayTimer_HH; //byte hours
+			}
 		}
 	}
 	
@@ -1003,7 +1005,11 @@ unsigned char	UART_check_data_RF(void){
 //get the last byte from the UART buffer
 //(you have to write into this function the command for your MCU)
 unsigned char	UART_get_last_byte_RF(void){
-	return uart_receive_buffer[uart_receive_cnt-1];
+	if(uart_receive_cnt > 0){
+		return uart_receive_buffer[uart_receive_cnt-1];
+	}else{
+		return (unsigned char)(0);
+	}
 }
 
 

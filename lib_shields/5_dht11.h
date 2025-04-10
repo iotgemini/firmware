@@ -39,8 +39,8 @@
 #define NUM_IO_DHT11_5			1		//it is the less significant byte of the univocal identifier
 
 #define DHTLIB_OK                0
-#define DHTLIB_ERROR_CHECKSUM   -1
-#define DHTLIB_ERROR_TIMEOUT    -2
+//#define DHTLIB_ERROR_CHECKSUM   -1
+//#define DHTLIB_ERROR_TIMEOUT    -2
 
 //#define DHT11_DELAY_MS_BEFORE_READ_AGAIN    2500 	//it determine the reading frequency, for the DHT22 the max frequency should be at maximum of 0.5Hz so this as to be set more than 2000ms
 

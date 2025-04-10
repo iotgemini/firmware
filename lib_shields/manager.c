@@ -886,7 +886,11 @@ void check_and_parse_functions_manager(void){
 								decont_RelayTimer_10ms = 99;
 							}else{
 								if(decont_RelayTimer_SS==0){
-									array_cmd2[7]=(semRelayTimer&0b00111111)-1; //set id output
+									if((semRelayTimer&0b00111111)>0){
+										array_cmd2[7]=(semRelayTimer&0b00111111)-1; //set id output
+									}else{
+										array_cmd2[7]=0; //set id output = 0
+									}
 									if((semRelayTimer&0b10000000)==0b10000000){
 										array_cmd2[8]=1; //set on
 									}else{

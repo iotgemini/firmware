@@ -168,7 +168,7 @@ void 	execute_USART_CMD(char byte_received){
 	cont_time_out_cmd = MAX_TIMEOUT_CMD;
 	str_cmd[len_str_cmd] = byte_received;
 	
-	if(len_str_cmd<(MAX_LEN_STR_CMD-1)){
+	if(len_str_cmd<(int)(MAX_LEN_STR_CMD-1)){
 		len_str_cmd++;
 		
 		if(str_cmd[0]=='C'){ 
@@ -1678,10 +1678,10 @@ unsigned char manager_CMD_to_Run(char New_CMD_to_Run){
 				CMD_to_Run = buffer_CMD_to_Run[0];
 				
 				//now shift by one the buffer
-				for(i=0; i<(cont_buffer_CMD_to_Run-1); i++){
+				cont_buffer_CMD_to_Run--;
+				for(i=0; i<(int)(cont_buffer_CMD_to_Run); i++){
 					 buffer_CMD_to_Run[i] =  buffer_CMD_to_Run[i+1];
 				}
-				cont_buffer_CMD_to_Run--;
 				buffer_CMD_to_Run[cont_buffer_CMD_to_Run] = 100; //last byte become empty
 				
 				//USART_SendByte('b');
