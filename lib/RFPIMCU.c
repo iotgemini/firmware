@@ -96,7 +96,7 @@ void fill_data_with_status_pin_and_send_back(unsigned char *data, unsigned char 
 	varErrorReadingPin = return_value_pin(num_pin, (unsigned char *)data);
 
 
-	if(num_pin>2 && num_pin < 12 && varErrorReadingPin==0){
+	if(/*num_pin>2 && num_pin < 12 &&*/ varErrorReadingPin==0){
 		//this make blink the led to notify the command has been received correctly
 		Led_TX_OFF_and_after_delay_turn_ON();
 		
@@ -175,7 +175,7 @@ void p_SendOutStatus(void){
 	data[0] = 'R';
 	data[1] = 'B';
 	data[2] = 'p';
-	data[3] = cmd_rfpi[7];	//identifier input	
+	data[3] = cmd_rfpi[7];	//identifier output
 	
 	
 	unsigned char num_pin_to_send_status=2;

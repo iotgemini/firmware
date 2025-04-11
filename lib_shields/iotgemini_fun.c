@@ -173,186 +173,190 @@ unsigned char num_pin_iotgemini_from_id_output(unsigned char id_io){
 unsigned char return_value_pin(unsigned char num_pin_to_return_status, unsigned char *data){
 	unsigned char varExit = 0;
 	unsigned char varReturn = 0; //if stay at 0 then no error occured
-	
-	data[5] = 1; //it means there is 1 bit
-	
-	unsigned char wheight_num_pin = 0b00000001;
-	wheight_num_pin = wheight_num_pin << (num_pin_to_return_status - 3);
-	if(root_pin_functions->SEM_DHT11 != 0 && wheight_num_pin == (root_pin_functions->SEM_DHT11 & wheight_num_pin) ){
-		
-		data[4] = (unsigned char)pointer_struct_DHT11->I_umidity[(num_pin_to_return_status - 3)];
-		
-		data[5] = 32; //it means there are 32bits for the float value
-		//data[5] = 32+8; //it means there are 32bits + 8bit for check sum
-		
-		data[6] = (unsigned char)(pointer_struct_DHT11->I_umidity[(num_pin_to_return_status - 3)] >> 8); 
-		data[7] = (unsigned char)(pointer_struct_DHT11->I_umidity[(num_pin_to_return_status - 3)] ); 
-		//data[8] = (unsigned char)(pointer_struct_DHT11->D_umidity[(num_pin_to_return_status - 3)] >> 8); 
-		//data[9] = (unsigned char)pointer_struct_DHT11->D_umidity[(num_pin_to_return_status - 3)]; 
-		
-		data[8] = (unsigned char)(pointer_struct_DHT11->temperature[(num_pin_to_return_status - 3)] >> 8); 
-		data[9] = (unsigned char)pointer_struct_DHT11->temperature[(num_pin_to_return_status - 3)]; 
-		
-		//if(data[6]==0xFF && data[7]==0xFF && data[8]==0xFF && data[9]==0xFF) varReturn = 1; //impossibile to read dht11
-		
-		//data[10] = (unsigned char)pointer_struct_DHT11->checkSum[(num_pin_to_return_status - 3)]; 
-		
-		pointer_struct_DHT11->sem_get_new_value_with_this_pin |= wheight_num_pin;
-		
-		//data[15] = 5; //DHT11 //this says to the gateway the ID of the shield is connected
-		
-	//ID=0 //PD3 = PIN3
-	}else if(num_pin_to_return_status == 3){ 
-		
-		if((root_pin_functions->SEM_PWM & 0b00000001) != 0){ //check if it is used as PWM
-			data[4] = get_duty_cycle_RED_LED();
-			data[5] = 8; //it means that is an analogue output
-			//data[15] = 4; //RGB //this says to the gateway the ID of the shield is connected
-		//}else if(root_pin_functions->SEM_DHT11 != 0){
-		//	data[4] = pointer_struct_DHT11->value_DHT11;
-		//	pointer_struct_DHT11->sem_get_new_value = 1;
-			
-		}else{
-			data[4] = bolean_pin_is_set(PIND,3); 
-			/*if((root_pin_functions->PIN_MASK & 0b00000001) != 0){ //check if it is an output
-				//it means that is an output
-				data[15] = 1; //LED - RELAY //this says to the gateway the ID of the shield is connected
-			}else{
-				//it means this is an input 
-				data[15] = 2; //SW //this says to the gateway the ID of the shield is connected
-			}*/
-			
-		}
-	}else 
-	
-	//ID=1 //PD0 = PIN4
-	if(num_pin_to_return_status == 4){
-		
-		data[4] = bolean_pin_is_set(PIND,0); 
-		/*if((root_pin_functions->PIN_MASK & 0b00000010) != 0) //check if it is an output
-			data[5] = 0; //it means that is an output
-		else 
-			data[5] = 1; //it means there are 1 bit
-		*/
-	}else
-	
-	//ID=2 //PC0 = PIN5  
-	if(num_pin_to_return_status == 5){
-		if((root_pin_functions->PIN_MASK & 0b00000100) != 0){ //check if it is an output
-			data[4] = bolean_pin_is_set(PINC,0);
-		}else{
-			
-			if((root_pin_functions->SEM_ADC & 0b00000100) != 0){ //it is analogue input
-				data[4] = (unsigned char)(ADC0_Average / 4);
-				data[5] = 10; //it means there are 10 bit
-				data[6] = (unsigned char)(ADC0_Average >> 8); 
-				data[7] = (unsigned char)ADC0_Average; 
-			}else{ //it is digital input
-				data[4] = bolean_pin_is_set(PINC,0); //PC0 = PIN5
-				//data[5] = 1; //it means there are 1 bit
-			}
-		}
-		
-	}else
-		
-	//ID=3 //PD6 = PIN6
-	if(num_pin_to_return_status == 6){
-		if((root_pin_functions->SEM_PWM & 0b00001000) != 0){ //check if it is used as PWM
-			data[4] = get_duty_cycle_BLUE_LED();
-			data[5] = 8; //it means that is an nalogue output
-		}else{
-			data[4] = bolean_pin_is_set(PIND,6); 
-		}
-	}else
-		
-	//ID=4 //PC4 = PIN7
-	if(num_pin_to_return_status == 7){
-		if((root_pin_functions->PIN_MASK & 0b00010000) != 0){ //check if it is an output
-			data[4] = bolean_pin_is_set(PINC,4);
-			//data[5] = 0; //it means that is an output
-		}else{
-			if((root_pin_functions->SEM_ADC & 0b00010000) != 0){ //it is analogue input
-				//ADC4_Average =	get_10bit_adc(NUM_ADC4);//temp to delete
-			
-				data[4] = (unsigned char)(ADC4_Average / 4);
-				data[5] = 10; //it means there are 10 bit
-				data[6] = (unsigned char)(ADC4_Average >> 8); 
-				data[7] = (unsigned char)ADC4_Average; 
-				
-				#ifdef UART_DEBUG_RFPIMCU
-				UART_DEBUG_RFPIMCU_send_STR2((unsigned char *)"ADC4=",1); //it send a string through the UART only if is in debug mode
-				UART_DEBUG_send_NUM_BYTE_HEX(data[4], 0);
-				#endif
-			}else{ //it is digital input
-				data[4] = bolean_pin_is_set(PINC,4); 
-				//data[5] = 1; //it means there are 1 bit
-			}
-		}
-	}else
-	
-	//ID=5 //PD1 = PIN8
-	if(num_pin_to_return_status == 8){
-		data[4] = bolean_pin_is_set(PIND,1); 
-		/*if((root_pin_functions->PIN_MASK & 0b00100000) != 0) //check if it is an output
-			data[5] = 0; //it means that is an output
-		else 
-			data[5] = 1; //it means there are 1 bit
-		*/
-	}else
-		
-	//ID=6 //PD5 = PIN9
-	if(num_pin_to_return_status == 9){
-		if((root_pin_functions->SEM_PWM & 0b01000000) != 0){ //check if it is used as PWM
-			data[4] = get_duty_cycle_GREEN_LED();
-			data[5] = 8; //it means that is an nalogue output
-		}else{
-			data[4] = bolean_pin_is_set(PIND,5); 
-		}
-	}else
+	unsigned char wheight_num_pin;
 
-	//ID=7 //PC5 = PIN10
-	if(num_pin_to_return_status == 10){
-		if((root_pin_functions->PIN_MASK & 0b10000000) != 0){ //check if it is an output
-			data[4] = bolean_pin_is_set(PINC,5);
-			//data[5] = 0; //it means that is an output
-		}else{
-			if((root_pin_functions->SEM_ADC & 0b10000000) != 0){ //it is analogue input
-				data[4] = (unsigned char)(ADC5_Average / 4);
-				data[5] = 10; //it means there are 10 bit
-				data[6] = (unsigned char)(ADC5_Average >> 8); 
-				data[7] = (unsigned char)ADC5_Average; 
-			}else{ //it is digital input
-				data[4] = bolean_pin_is_set(PINC,5); //PC5 = PIN10
-				//data[5] = 1; //it means there are 1 bit
-			}
-		}
-	}
-	
-	//ID=8 //Virtual = PIN11
-	if(num_pin_to_return_status == 11){
-				data[4] = (unsigned char)(ADC1_Average / 4);
-				data[5] = 10; //it means there are 10 bit
-				data[6] = (unsigned char)(ADC1_Average >> 8); 
-				data[7] = (unsigned char)ADC1_Average; 
-				
-				data[13] = 255; //this says to the gateway the ID of the shield is connected
+	if(num_pin_to_return_status < 3 || num_pin_to_return_status >= 12){ //if the pin number is not higher than 2 and is not lower than 12 than is not valid
+		varReturn = 1 ; //it return error
 	}else{
-		//this cycle is used to find which shield is connected to the pin 
-		current_settings_shield = root_struct_shields->root_settings_shield;
-		while(current_settings_shield != 0 && varExit==0){
-			if( (current_settings_shield->PIN_USED & wheight_num_pin) == wheight_num_pin ){//this pin is used: PIN3 = PD3
-				
-				data[13] = current_settings_shield->ID; //this says to the gateway the ID of the shield is connected
-				varExit=1;
+		data[5] = 1; //it means there is 1 bit
+
+		wheight_num_pin = 0b00000001;
+		wheight_num_pin = wheight_num_pin << (num_pin_to_return_status - 3);
+		if(root_pin_functions->SEM_DHT11 != 0 && wheight_num_pin == (root_pin_functions->SEM_DHT11 & wheight_num_pin) ){
+
+			data[4] = (unsigned char)pointer_struct_DHT11->I_umidity[(num_pin_to_return_status - 3)];
+
+			data[5] = 32; //it means there are 32bits for the float value
+			//data[5] = 32+8; //it means there are 32bits + 8bit for check sum
+
+			data[6] = (unsigned char)(pointer_struct_DHT11->I_umidity[(num_pin_to_return_status - 3)] >> 8);
+			data[7] = (unsigned char)(pointer_struct_DHT11->I_umidity[(num_pin_to_return_status - 3)] );
+			//data[8] = (unsigned char)(pointer_struct_DHT11->D_umidity[(num_pin_to_return_status - 3)] >> 8);
+			//data[9] = (unsigned char)pointer_struct_DHT11->D_umidity[(num_pin_to_return_status - 3)];
+
+			data[8] = (unsigned char)(pointer_struct_DHT11->temperature[(num_pin_to_return_status - 3)] >> 8);
+			data[9] = (unsigned char)pointer_struct_DHT11->temperature[(num_pin_to_return_status - 3)];
+
+			//if(data[6]==0xFF && data[7]==0xFF && data[8]==0xFF && data[9]==0xFF) varReturn = 1; //impossibile to read dht11
+
+			//data[10] = (unsigned char)pointer_struct_DHT11->checkSum[(num_pin_to_return_status - 3)];
+
+			pointer_struct_DHT11->sem_get_new_value_with_this_pin |= wheight_num_pin;
+
+			//data[15] = 5; //DHT11 //this says to the gateway the ID of the shield is connected
+
+		//ID=0 //PD3 = PIN3
+		}else if(num_pin_to_return_status == 3){
+
+			if((root_pin_functions->SEM_PWM & 0b00000001) != 0){ //check if it is used as PWM
+				data[4] = get_duty_cycle_RED_LED();
+				data[5] = 8; //it means that is an analogue output
+				//data[15] = 4; //RGB //this says to the gateway the ID of the shield is connected
+			//}else if(root_pin_functions->SEM_DHT11 != 0){
+			//	data[4] = pointer_struct_DHT11->value_DHT11;
+			//	pointer_struct_DHT11->sem_get_new_value = 1;
+
+			}else{
+				data[4] = bolean_pin_is_set(PIND,3);
+				/*if((root_pin_functions->PIN_MASK & 0b00000001) != 0){ //check if it is an output
+					//it means that is an output
+					data[15] = 1; //LED - RELAY //this says to the gateway the ID of the shield is connected
+				}else{
+					//it means this is an input
+					data[15] = 2; //SW //this says to the gateway the ID of the shield is connected
+				}*/
+
 			}
-			current_settings_shield = current_settings_shield->next;
+		}else
+		
+		//ID=1 //PD0 = PIN4
+		if(num_pin_to_return_status == 4){
+
+			data[4] = bolean_pin_is_set(PIND,0);
+			/*if((root_pin_functions->PIN_MASK & 0b00000010) != 0) //check if it is an output
+				data[5] = 0; //it means that is an output
+			else
+				data[5] = 1; //it means there are 1 bit
+			*/
+		}else
+		
+		//ID=2 //PC0 = PIN5
+		if(num_pin_to_return_status == 5){
+			if((root_pin_functions->PIN_MASK & 0b00000100) != 0){ //check if it is an output
+				data[4] = bolean_pin_is_set(PINC,0);
+			}else{
+
+				if((root_pin_functions->SEM_ADC & 0b00000100) != 0){ //it is analogue input
+					data[4] = (unsigned char)(ADC0_Average / 4);
+					data[5] = 10; //it means there are 10 bit
+					data[6] = (unsigned char)(ADC0_Average >> 8);
+					data[7] = (unsigned char)ADC0_Average;
+				}else{ //it is digital input
+					data[4] = bolean_pin_is_set(PINC,0); //PC0 = PIN5
+					//data[5] = 1; //it means there are 1 bit
+				}
+			}
+
+		}else
+			
+		//ID=3 //PD6 = PIN6
+		if(num_pin_to_return_status == 6){
+			if((root_pin_functions->SEM_PWM & 0b00001000) != 0){ //check if it is used as PWM
+				data[4] = get_duty_cycle_BLUE_LED();
+				data[5] = 8; //it means that is an nalogue output
+			}else{
+				data[4] = bolean_pin_is_set(PIND,6);
+			}
+		}else
+			
+		//ID=4 //PC4 = PIN7
+		if(num_pin_to_return_status == 7){
+			if((root_pin_functions->PIN_MASK & 0b00010000) != 0){ //check if it is an output
+				data[4] = bolean_pin_is_set(PINC,4);
+				//data[5] = 0; //it means that is an output
+			}else{
+				if((root_pin_functions->SEM_ADC & 0b00010000) != 0){ //it is analogue input
+					//ADC4_Average =	get_10bit_adc(NUM_ADC4);//temp to delete
+
+					data[4] = (unsigned char)(ADC4_Average / 4);
+					data[5] = 10; //it means there are 10 bit
+					data[6] = (unsigned char)(ADC4_Average >> 8);
+					data[7] = (unsigned char)ADC4_Average;
+
+					#ifdef UART_DEBUG_RFPIMCU
+					UART_DEBUG_RFPIMCU_send_STR2((unsigned char *)"ADC4=",1); //it send a string through the UART only if is in debug mode
+					UART_DEBUG_send_NUM_BYTE_HEX(data[4], 0);
+					#endif
+				}else{ //it is digital input
+					data[4] = bolean_pin_is_set(PINC,4);
+					//data[5] = 1; //it means there are 1 bit
+				}
+			}
+		}else
+		
+		//ID=5 //PD1 = PIN8
+		if(num_pin_to_return_status == 8){
+			data[4] = bolean_pin_is_set(PIND,1);
+			/*if((root_pin_functions->PIN_MASK & 0b00100000) != 0) //check if it is an output
+				data[5] = 0; //it means that is an output
+			else
+				data[5] = 1; //it means there are 1 bit
+			*/
+		}else
+			
+		//ID=6 //PD5 = PIN9
+		if(num_pin_to_return_status == 9){
+			if((root_pin_functions->SEM_PWM & 0b01000000) != 0){ //check if it is used as PWM
+				data[4] = get_duty_cycle_GREEN_LED();
+				data[5] = 8; //it means that is an nalogue output
+			}else{
+				data[4] = bolean_pin_is_set(PIND,5);
+			}
+		}else
+		
+		//ID=7 //PC5 = PIN10
+		if(num_pin_to_return_status == 10){
+			if((root_pin_functions->PIN_MASK & 0b10000000) != 0){ //check if it is an output
+				data[4] = bolean_pin_is_set(PINC,5);
+				//data[5] = 0; //it means that is an output
+			}else{
+				if((root_pin_functions->SEM_ADC & 0b10000000) != 0){ //it is analogue input
+					data[4] = (unsigned char)(ADC5_Average / 4);
+					data[5] = 10; //it means there are 10 bit
+					data[6] = (unsigned char)(ADC5_Average >> 8);
+					data[7] = (unsigned char)ADC5_Average;
+				}else{ //it is digital input
+					data[4] = bolean_pin_is_set(PINC,5); //PC5 = PIN10
+					//data[5] = 1; //it means there are 1 bit
+				}
+			}
 		}
+		
+		//ID=8 //Virtual = PIN11
+		if(num_pin_to_return_status == 11){
+					data[4] = (unsigned char)(ADC1_Average / 4);
+					data[5] = 10; //it means there are 10 bit
+					data[6] = (unsigned char)(ADC1_Average >> 8);
+					data[7] = (unsigned char)ADC1_Average;
+
+					data[13] = 255; //this says to the gateway the ID of the shield is connected
+		}else{
+			//this cycle is used to find which shield is connected to the pin
+			current_settings_shield = root_struct_shields->root_settings_shield;
+			while(current_settings_shield != 0 && varExit==0){
+				if( (current_settings_shield->PIN_USED & wheight_num_pin) == wheight_num_pin ){//this pin is used: PIN3 = PD3
+
+					data[13] = current_settings_shield->ID; //this says to the gateway the ID of the shield is connected
+					varExit=1;
+				}
+				current_settings_shield = current_settings_shield->next;
+			}
+		}
+		data[14] = num_pin_to_return_status; //this says to the gateway the number of the pin
+		
+		//the last byte is used for the checksum error
+		//data[15] = calc_checksum (data, 15); //it calc for the first 15 bytes
 	}
-	data[14] = num_pin_to_return_status; //this says to the gateway the number of the pin
-	
-	//the last byte is used for the checksum error
-	//data[15] = calc_checksum (data, 15); //it calc for the first 15 bytes
-	
 	return varReturn;
 }
 

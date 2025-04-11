@@ -1,4 +1,4 @@
-cd C:\Progetti\FWIOTG
+cd C:\ProgettiGitHub\firmware
 del main.hex
 make
 avr-size -C --mcu=atmega328p main.elf

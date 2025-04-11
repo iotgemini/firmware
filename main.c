@@ -68,7 +68,8 @@ FUSES WITH BOOTLOADER:
 
 
 //#define FW_VERSION_RF_IOTGEMINI 				1	//this can go up to 65535. This will allow to reset the eeprom when the FW new is loaded on the MCU because it find on the eeprom a different version then will erase the eeprom
-#define FW_VERSION_RF_IOTGEMINI 				4	//v1.0.2.1  10/04/2025		//minor bugs
+#define FW_VERSION_RF_IOTGEMINI 				4	//v1.0.2.2  11/04/2025		//into thresholds functions added the control that will overwrite the status of the output if some other control will change it
+//#define FW_VERSION_RF_IOTGEMINI 				4	//v1.0.2.1  10/04/2025		//minor bugs
 //#define FW_VERSION_RF_IOTGEMINI 				4	//v1.0.2.0  18/06/2023		//Added thresholds functions
 //#define FW_VERSION_RF_IOTGEMINI 				4	//v1.0.1.6  19/03/2023
 //#define FW_VERSION_RF_IOTGEMINI 				4	//v1.0.1.5

@@ -472,6 +472,7 @@ void check_and_parse_functions_manager(void){
 	unsigned char temp_input_trigger;
 	unsigned char temp_id_input;
 	unsigned char temp_num_pin_input;
+	unsigned char temp_num_pin_output;
 	unsigned char temp_status_pin_input;
 	unsigned char temp_last_status_pin;
 	unsigned char temp_status_output_to_set;
@@ -485,6 +486,9 @@ void check_and_parse_functions_manager(void){
 	unsigned int u16_temp_value_pin;
 
 	unsigned long u32TempVar;
+
+	unsigned char varErrorReadingPin=0;
+
 
 	
 	if(decont_check_and_parse_functions_manager == 0){
@@ -515,7 +519,7 @@ void check_and_parse_functions_manager(void){
 					temp_id_input = (fun_input_ctrl_output[ii]>>3) & 0x07; //mantiene i primi 3 bit che identifica il numero di ID dell'input
 					//per sapere il valore fisico del pin corrispondente, estraggo il numero di pin relativo all'ID e poi ne leggo il valore
 					temp_num_pin_input = num_pin_iotgemini_from_id_input(temp_id_input);
-					return_value_pin(temp_num_pin_input, data); 
+					varErrorReadingPin = return_value_pin(temp_num_pin_input, data);
 					temp_status_pin_input = data[4]; //dentro data[4] ho il valore dell'input scritto dalla funzione return_value_pin
 					if(temp_status_pin_input>0){ //questo per assicurarmi di poterlo poi confrontare sucessivamente con il bit relativo memorizzato dentro il byte last_status_input
 						temp_status_pin_input = 1;
@@ -561,7 +565,7 @@ void check_and_parse_functions_manager(void){
 			
 								//this get the value and into data[4] there is a value on 8bit, into the data[5] there is the num of bit used, 
 								//if the num bit used is over 8bit the data it is not kept into data[4], but into the consecutive data[6],data[7].....data[x]
-								return_value_pin(temp_pin_output, data);
+								varErrorReadingPin = return_value_pin(temp_pin_output, data);
 
 								if(data[4]==0){
 									array_cmd2[8]=255; //set on
@@ -725,7 +729,7 @@ void check_and_parse_functions_manager(void){
 						temp_id_input = (unsigned char)(fun_threshold_ctrl_output[ll] & 0b00000111); // I get the input ID that control the output
 						//per sapere il valore fisico del pin corrispondente, estraggo il numero di pin relativo all'ID e poi ne leggo il valore
 						temp_num_pin_input = num_pin_iotgemini_from_id_input(temp_id_input);
-						return_value_pin(temp_num_pin_input, data);
+						varErrorReadingPin = return_value_pin(temp_num_pin_input, data);
 
 						#ifdef UART_DEBUG_MANAGER_FUNCTIONS_THRESHOLDS
 						UART_DEBUG_MANAGER_send_STR2((unsigned char *)"***",1);
@@ -827,10 +831,21 @@ void check_and_parse_functions_manager(void){
 							}
 						}
 						ll = (unsigned char)(ii+10); //index byte10 for THRESHOLD0 and byte11 for THRESHOLD1
-						if(fun_threshold_ctrl_output[ll] != array_cmd2[8]){ //the last 2 bytes of the vector fun_threshold_ctrl_output[] are used as flag to remeber the last status of the output
-							fun_threshold_ctrl_output[ll] = array_cmd2[8]; //saving last status thus it will not keep send via radio the status of the output with the following function o_SetOut()
-							o_SetOut(array_cmd2,1);		//Function to set the status of an output
+						temp_num_pin_output = num_pin_iotgemini_from_id_output(array_cmd2[7]); // dall'ID  (array_cmd2[7]) dell'output da controllare ottengo il numero di pin fisico che è nello schema
+						varErrorReadingPin = return_value_pin(temp_num_pin_output, (unsigned char *)data);
+						if(varErrorReadingPin==0){ //no error in reading status of the output
+							//data[4] //actual value of the output
+							//data[5] //size of the variable that contain the output status/value. If it is 1 the value is bolean, otherwise can be 8 thus is a byte which is used for PWM (RGB control)
+							if(	(array_cmd2[8] == 0 && data[4] > 0) 		//if the status to set (array_cmd2[8]) is different from the actual value of the status of the output (data[4]) then has to set the output with the new status (array_cmd2[8])
+								|| (array_cmd2[8] > 0 && data[4] == 0)
+								|| (fun_threshold_ctrl_output[ll] != data[4]) 	//the last 2 bytes of the vector fun_threshold_ctrl_output[] are used as flag to remember the last status of the output
+							){
+								fun_threshold_ctrl_output[ll] = data[4]; //saving last status thus it will not keep calling the function o_SetOut()
+								o_SetOut(array_cmd2,0);		//Function to set the status of an output
+							}
 						}
+
+
 						#ifdef UART_DEBUG_MANAGER_FUNCTIONS_THRESHOLDS
 						UART_DEBUG_MANAGER_send_STR2((unsigned char *)"***",1);
 						#endif
