@@ -2,7 +2,7 @@
 	MCU: 					ATmega328p
 	Programmer:				Emanuele Aimone
 	Version:				1.0
-	Last Update:			18 / 06 / 2023
+	Last Update:			14 / 04 / 2025
 	
 	Description:			FW per IOTGEMINI platform
 							
@@ -85,7 +85,7 @@ FUSES WITH BOOTLOADER:
 //#define RFNANO //this to use the arduino nano with integrated the nrf24l01 chip (under cosnstruction)
 
 //uncomment the following line to get the macro works
-//#define 	BLINK_LED			 	for(int ii=0;ii<5;ii++){PORTD|=0x80;_delay_ms(100);PORTD&=~0x80;_delay_ms(100);wdt_reset();}
+//#define 	BLINK_LED			 	for(int ii=0;ii<50;ii++){u8_decont_emulated_wdt = VALUE_EMULATE_WDT;PORTD|=0x80;delay_ms_at328(100);PORTD&=~0x80;delay_ms_at328(100);}
 
 #include <avr/io.h> 
 #include <avr/interrupt.h>
@@ -109,6 +109,7 @@ char var_carrier_led;
 #ifdef ENABLE_SPECIAL_FUNCTIONS
 #include "./funzioni_speciali.h"
 #endif
+
 
 #include "./mcu/mcu_at328.h"
 
@@ -151,9 +152,7 @@ char var_carrier_led;
 
 #include "./mcu/interrupt_at328.c"
 
-
 int main(void){
-	wdt_reset(); //it reset the WDT
 	unsigned char var_temp_byte;
 
 	//this init the IO, init external modules, check protections
@@ -170,8 +169,7 @@ int main(void){
 			var_temp_byte = var_EEPROM_Semaphore | 0b00000001; //here disable the programming IoT network
 			eeprom_write_byte ((unsigned char *)(START_BYTE_TO_CHECK_SEMAPHORES), (unsigned char )var_temp_byte);
 			PIN_LED_TX_ON; //led on
-			var_RESET_NOW = 1; //at 1 it make the MCU to reset itself through the WDT
-			while(1);
+			REBOOT_MCU; //it make the MCU to reset itself through the WDT. Here the MCU does not execute the next instruction below
 		}
 
 		if( sem_Used_As_Peripheral == 1){
@@ -198,8 +196,7 @@ int main(void){
 		}else{ //here the code as transceiver only
 			if(STATUS_RESET	== 0){
 				while(STATUS_RESET	== 0); //it reset through the WDT
-				var_RESET_NOW = 1; //at 1 it make the MCU to reset itself through the WDT
-				while(1);
+				REBOOT_MCU; //it make the MCU to reset itself through the WDT. Here the MCU does not execute the next instruction below
 			}
 			if( STATUS_CD == 0 ){
 				PIN_LED_TX_ON;
@@ -229,13 +226,9 @@ int main(void){
 			#ifdef UART_DEBUG
 			UART_DEBUG_send_STR(23, (unsigned char *)"Going to reset ........",1); //it send a string through the UART only if is in debug mode
 			#endif
-			var_RESET_NOW = 1; //at 1 it make the MCU to reset itself through the WDT
-			while(1);
+			REBOOT_MCU; //it make the MCU to reset itself through the WDT. Here the MCU does not execute the next instruction below
 		}
 
-//		if(var_RESET_NOW == 0){
-//			wdt_reset(); //it reset the WDT
-//		}
 		u8_decont_emulated_wdt = VALUE_EMULATE_WDT; //this variable has to be updated each time because at 0 the mcu would be rebooted
     }while(1);
 	
