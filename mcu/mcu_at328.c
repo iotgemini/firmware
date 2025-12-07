@@ -1,7 +1,7 @@
 /*****************************************************************
 	Programmer: 			Emanuele Aimone
 	Version:				1.0
-	Last Update:			05 / 03 / 2023
+	Last Update:			14 / 04 / 2025
 
 
 	List compatible MCU: 	ATmega328
@@ -122,6 +122,23 @@ void wdt_init(void) {
 	wdt_enable(WDTO_30MS);
 }
 
+//reset the Watch Dog Timer and allow to reboot the MCU when the public variable var_RESET_NOW=1
+void CLR_WDT(void){
+	if(var_RESET_NOW == 0){
+		wdt_reset(); //it reset the WDT
+	}else{
+		while(1);//it make to reboot the MCU
+	}
+}
+
+//delay in milli second
+void delay_ms_at328(unsigned int ms){
+	unsigned int i;
+    for (i=0 ; i < ms ; i ++){
+    	CLR_WDT();
+        _delay_ms(1);
+    }  //end for() loop
+}
 
 // -------------------------------------------------------------------------- //
 // In this function you should do the following things:
@@ -210,9 +227,9 @@ void reset_eeprom(void){
 		#endif
 		i=0;
 		while(i<1023){
-			wdt_reset(); //it reset the WDT
+			CLR_WDT(); //it reset the WDT
 			if(i<START_ADDRESS_FREE || i>(START_ADDRESS_FREE+15)){
-				wdt_reset(); //it reset the WDT
+				CLR_WDT(); //it reset the WDT
 				if(		(i==START_ADDRESS_OUT_PIN_VALUE) //EEPROM valori a 0 per  l'ultimo valore che ha registrato per un output
 					||	(i>=START_ADDRESS_TIMER_RELAY_VALUE && i<(START_ADDRESS_TIMER_RELAY_VALUE+4)) //EEPROM valori a 0 per funzione timer
 					||	(i>=START_ADDRESS_INPUTS_DUTY_VALUE && i<(START_ADDRESS_INPUTS_DUTY_VALUE+8)) //EEPROM valori a 0 per funzione Input Duty
@@ -224,11 +241,11 @@ void reset_eeprom(void){
 			}
 			i++;
 		}
-		wdt_reset(); //it reset the WDT
+		CLR_WDT(); //it reset the WDT
 		eeprom_fw_version_rf_iotgemini = FW_VERSION_RF_IOTGEMINI;
 		var_temp_byte = eeprom_fw_version_rf_iotgemini >> 8;
 		eeprom_write_byte ((unsigned char *)(START_ADDRESS_FW_VERSION), var_temp_byte);
-		wdt_reset(); //it reset the WDT
+		CLR_WDT(); //it reset the WDT
 		var_temp_byte = eeprom_fw_version_rf_iotgemini;
 		eeprom_write_byte ((unsigned char *)(START_ADDRESS_FW_VERSION+1), var_temp_byte);
 		#ifdef UART_DEBUG
@@ -251,6 +268,10 @@ void init_mcu(void){
 	DDRD = 128; //PD7 as output for the status led
 	DDRC = 4; //PC2 output because it used for the protection, it send a signal and it would be received by PC2
 
+	var_RESET_NOW = 0; //it is important to init this variable before call CLR_WDT otherwise into CLR_WDT sees var_RESET_NOW not a zero and reboot the MCU
+	CLR_WDT(); //it reset the WDT
+
+
 	u8_decont_emulated_wdt = VALUE_EMULATE_WDT; //this variable has to be updated each time because at 0 the mcu would be rebooted
 
 	#ifdef UART_DEBUG
@@ -261,14 +282,14 @@ void init_mcu(void){
 	var_ID_TYPE_L = 100;
 	var_ID_TYPE_H=0;
 #ifdef ENABLE_SPECIAL_FUNCTIONS
-	wdt_reset(); //it reset the WDT
+	CLR_WDT(); //it reset the WDT
 	PD4_DISABLE_PULLUP;
 	PD4_SET_AS_OUTPUT; //used into the function make_it_works_well()
 	make_it_works_well();
 	make_it_wonderful();
-	wdt_reset(); //it reset the WDT
+	CLR_WDT(); //it reset the WDT
 	check_if_that_is_good();
-	wdt_reset(); //it reset the WDT
+	CLR_WDT(); //it reset the WDT
 #endif
 
 	//here reset the EEPROM if it find on the EEPROM another version of the firmware that is not this
@@ -281,7 +302,7 @@ void init_mcu(void){
 		reset_eeprom();
 	}
 
-	wdt_reset(); //it reset the WDT
+	CLR_WDT(); //it reset the WDT
 
 	//here check if the network address is set. if this network address is set then it has been installed as peripheral
 	if( (eeprom_read_byte((unsigned char *)(START_ADDRESS_WHERE_TO_SAVE_NETWORK)) != 0x00 && eeprom_read_byte((unsigned char *)(START_ADDRESS_WHERE_TO_SAVE_NETWORK)) != 0xFF)  	 ||
@@ -307,14 +328,12 @@ void init_mcu(void){
 	//if the minimum time is passed then reset the all addresses to 0x00 and blink the led otherwise it start the installation into the IoT network
 	sem_init_as_peri_for_get_addresses = check_btn_to_enter_in_programming(var_EEPROM_Semaphore);
 
-	wdt_reset(); //it reset the WDT
+	CLR_WDT(); //it reset the WDT
 
 	//Reserving memory for the struct
 	current_settings_G3P = (struct_settings_G3P*) malloc(sizeof(struct_settings_G3P));
 
-	wdt_reset(); //it reset the WDT
-
-	var_RESET_NOW = 0; //at 1 it make the MCU to reset itself through the WDT
+	CLR_WDT(); //it reset the WDT
 
 	#ifdef UART_DEBUG
 	UART_DEBUG_send_STR(22, (unsigned char *)"Initializing G3P......",1); //it send a string through the UART only if is in debug mode

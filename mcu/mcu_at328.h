@@ -1,7 +1,7 @@
 /*****************************************************************
 	Programmer: 			Emanuele Aimone
 	Version:				1.0
-	Last Update:			01 / 03 / 2023
+	Last Update:			14 / 04 / 2025
 
 
 	List compatible MCU: 	ATmega328
@@ -179,10 +179,15 @@
 #define PIN_SS                    	PORTB2
 
 /*****************************************************************
+ * 	PUBLIC MACRO
+*****************************************************************/
+#define REBOOT_MCU                  var_RESET_NOW=1
+
+/*****************************************************************
  * 	PUBLIC VARIABLES
 *****************************************************************/
 extern volatile char var_pin_busy;
-extern volatile unsigned char var_RESET_NOW;			//this variable is set to 0 when a function need the mcu to be restarted
+extern volatile unsigned char var_RESET_NOW;			//this variable is set to 1 when a function need the mcu to be restarted
 extern volatile unsigned char u8_decont_emulated_wdt;	//into the main loop is updated with 0xFF (255mS) and when the main loop does not update the value then the iterrupt "ISR (TIMER1_COMPA_vect)" decrement the variable and at 0 it reset the MCU
 
 /*****************************************************************
@@ -202,6 +207,8 @@ unsigned char 	bolean_pin_is_set(unsigned char port, unsigned char pin);
 void 			timer0_init(void); 											//inizializza i registri del Timer0
 void 			init_Timer1(void); 											//this code sets up timer1
 void 			wdt_init(void); 											//init the WDT to occur after 30mS
+void 			CLR_WDT(void); 												//reset the Watch Dog Timer and allow to reboot the MCU when the public variable var_RESET_NOW=1
+void			delay_ms_at328(unsigned int ms);							//delay in milli second
 void 			reset_eeprom(void); 										//it reset the EEPROM, but not the code to control if it is original!
 
 void 			init_10bit_adc(void);							//it init the ADC

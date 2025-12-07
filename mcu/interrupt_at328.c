@@ -1,7 +1,7 @@
 /*****************************************************************
 	Programmer: 			Emanuele Aimone
 	Version:				1.0
-	Last Update:			05 / 03 / 2023
+	Last Update:			14 / 04 / 2025
 
 
 	List compatible MCU: 	ATmega328
@@ -28,10 +28,10 @@
 *****************************************************************/
 
 //Interrupt Service Routine for INT0
-ISR(INT0_vect){
-	//not used
-	//here for future development
-}
+//ISR(INT0_vect){
+//	//not used
+//	//here for future development
+//}
 
 //Interrupt Service Routine for USART
 ISR(USART_RX_vect){
@@ -57,8 +57,8 @@ ISR(USART_RX_vect){
 */
 
 ISR (TIMER1_COMPA_vect){
-	if( (var_RESET_NOW == 0) && (u8_decont_emulated_wdt > 0) ){
-		wdt_reset(); //it reset the WDT
+	if(u8_decont_emulated_wdt > 0){
+		CLR_WDT(); //it reset the WDT
 		u8_decont_emulated_wdt--;
 	}
 
