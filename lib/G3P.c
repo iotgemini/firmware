@@ -35,7 +35,7 @@ void 	Init_G3P(void){
 	int cont_temp;
 	int i;
 	
-	wdt_reset(); //it reset the WDT
+	CLR_WDT(); //it reset the WDT
 	
 	CMD_to_Run = 100; //no command to run
 	
@@ -43,11 +43,11 @@ void 	Init_G3P(void){
 	
 	//getting settings from the eeprom
 	if(return_array_data_EEPROM((unsigned char*)&eeprom_data[0],NUM_BYTE_EEPROM_RF, START_ADDRESS_WHERE_TO_SAVE_RF) > 0){
-		wdt_reset(); //it reset the WDT
+		CLR_WDT(); //it reset the WDT
 		//it has to init the EEPROM
 		for(i=0;i<NUM_BYTE_EEPROM_RF;i++){ 
 			eeprom_data[i]=eeprom_def_tab_G3P[i]; 
-			wdt_reset(); //it reset the WDT
+			CLR_WDT(); //it reset the WDT
 		}
 		save_array_data_EEPROM((unsigned char*)&eeprom_data[0], NUM_BYTE_EEPROM_RF, START_ADDRESS_WHERE_TO_SAVE_RF);
 	}
@@ -63,9 +63,8 @@ void 	Init_G3P(void){
 	current_settings_G3P->Sem_Send_Back_Via_UART_the_Asterisk=eeprom_data[5]; //this is used to check if send back the asterisk for a CMD executed
 	//Loading addresses from EEPROM:
 	//This device address and Address of the device that to transmit
-	wdt_reset(); //it reset the WDT
+	CLR_WDT(); //it reset the WDT
 	for(cont_temp=0;cont_temp<5;cont_temp++){
-		//wdt_reset(); //it reset the WDT
 		current_settings_G3P->rx_address[cont_temp] = (char) eeprom_data[cont_temp+6];
 		current_settings_G3P->tx_address[cont_temp] = (char) eeprom_data[cont_temp+11];
 	}	
@@ -77,7 +76,7 @@ void 	Init_G3P(void){
 	current_settings_G3P->sem_TX_running=0;		//this indicate if the transmission of the data loaded into array_data_to_be_TX is happening
 
 	
-	wdt_reset(); //it reset the WDT
+	CLR_WDT(); //it reset the WDT
 	
 
 	//		LSB								MSB
@@ -98,7 +97,7 @@ void 	Init_G3P(void){
 	byte_to_hexascii((unsigned char*)&current_settings_G3P->tx_address[0], (unsigned char*)&current_settings_G3P->address_to_tx[0]);	//address that to send data
 	byte_to_hexascii((unsigned char*)&current_settings_G3P->tx_address[1], (unsigned char*)&current_settings_G3P->address_to_tx[2]);	//address that to send data
 	
-	wdt_reset(); //it reset the WDT
+	CLR_WDT(); //it reset the WDT
 	
 	
 	//This function enable the reply of '*' for any command without reply via UART
@@ -118,15 +117,12 @@ void 	Init_G3P(void){
 	#else
 		UART_DEBUG_G3P_send_STR(68, (unsigned char *)"It does not init the UART for G3P because the DEBUG mode is enabled!",1); //it send a string through the UART only if is in debug mode
 	#endif
-	//wdt_reset(); //it reset the WDT
 	
 	#ifdef UART_DEBUG_G3P 
 		UART_DEBUG_G3P_send_STR(22, (unsigned char *)"Initializing SPI......",1); //it send a string through the UART only if is in debug mode
 	#endif
 	//Inizializza la porta SPI come MASTER
 	SPI_MasterInit(); //inizializzare prima di nrf24_init();
-	
-	//wdt_reset(); //it reset the WDT
 	
 	PIN_CE_SET_ON; //it enable the NRF24L01
 	
@@ -1382,7 +1378,7 @@ void	function_cmd_to_run(void){
 				eeprom_data[4] = (unsigned char)current_settings_G3P->akn_yes; //
 				eeprom_data[5] = (unsigned char)current_settings_G3P->Sem_Send_Back_Via_UART_the_Asterisk; //At '0' Acknowledge is disabled, at '1' Acknowledge is enabled. If enabled, it make to return (via USART) OK if transmission is successful, else it return ?A 
 				for(int cont_temp=0;cont_temp<5;cont_temp++){
-					wdt_reset(); //it reset the WDT
+					CLR_WDT(); //it reset the WDT
 					eeprom_data[cont_temp+6] = (unsigned char)current_settings_G3P->rx_address[cont_temp];
 					eeprom_data[cont_temp+11] = (unsigned char)current_settings_G3P->tx_address[cont_temp];
 				}
@@ -1535,10 +1531,8 @@ void	function_cmd_to_run(void){
 					}
 				}
 				
-				var_RESET_NOW = 1; //at 1 it make the MCU to reset itself through the WDT
-				while(1);
-			
-			
+				REBOOT_MCU; //it make the MCU to reset itself through the WDT. Here the MCU does not execute the next instruction below
+
 				CMD_to_Run=100; //at 100 no command has to be run	
 				
 			}else if(CMD_to_Run==99){

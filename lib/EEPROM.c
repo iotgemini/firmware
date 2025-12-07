@@ -31,7 +31,7 @@
 void save_array_data_EEPROM(unsigned char *array_data, unsigned int lenght_array_data, unsigned int var_START_ADDRESS_WHERE_TO_SAVE){ 
 	unsigned int i=0;
 	while(i<lenght_array_data){
-		wdt_reset(); //it reset the WDT
+		CLR_WDT(); //it reset the WDT
 		eeprom_write_byte ((unsigned char *)(i+var_START_ADDRESS_WHERE_TO_SAVE), array_data[i]);
 		i++;
 	}
@@ -45,7 +45,7 @@ unsigned char return_array_data_EEPROM(unsigned char *array_data, unsigned int l
 	//check if is virgin
 	i=0; contVirginByte=0;
 	while(i<lenght_array_data){ //it check when it finds the 0xFF
-		wdt_reset(); //it reset the WDT
+		CLR_WDT(); //it reset the WDT
 		if(eeprom_read_byte((unsigned char *)(i+var_START_ADDRESS_WHERE_TO_SAVE)) == VALUE_VIRGIN_BYTE){
 			contVirginByte++;
 		}
@@ -56,7 +56,7 @@ unsigned char return_array_data_EEPROM(unsigned char *array_data, unsigned int l
 	}else{
 		i=0;
 		while(i<lenght_array_data){
-			wdt_reset(); //it reset the WDT
+			CLR_WDT(); //it reset the WDT
 			array_data[i] = (unsigned char)eeprom_read_byte((unsigned char *)(i+var_START_ADDRESS_WHERE_TO_SAVE));
 			i++;
 		}

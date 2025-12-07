@@ -100,7 +100,7 @@ void fill_data_with_status_pin_and_send_back(unsigned char *data, unsigned char 
 		//this make blink the led to notify the command has been received correctly
 		Led_TX_OFF_and_after_delay_turn_ON();
 		
-		UART_send_and_fill_data_to_RF((unsigned char *)data, 16);
+		UART_send_and_fill_data_to_RF((unsigned char *)data, 15);
 		
 		#ifdef UART_DEBUG_RFPIMCU
 		UART_DEBUG_RFPIMCU_send_STR2((unsigned char *)"SENT STATUS PIN",1); //it send a string through the UART only if is in debug mode
@@ -425,7 +425,7 @@ void f_SetFunction(void){
 	
 	//4th function: this set Values on 16bits that are the threshold to control an output
 	if(cmd_rfpi[7] == 4){
-		for(i=0;i<10;i++){
+		for(i=0;i<(LENGHT_ARRAY_DATA_THRESHOLD_FUNC-2);i++){
 			fun_threshold_ctrl_output[i] = cmd_rfpi[i+8];
 		}
 
@@ -584,7 +584,7 @@ void u_SendFunctionStatus(void){
 
 	//4th function: this Values on 16bits that are the threshold to control an output
 	if(cmd_rfpi[7] == 4){
-		for(i=0;i<10;i++){
+		for(i=0;i<(LENGHT_ARRAY_DATA_THRESHOLD_FUNC-2);i++){
 			 data[i+4] = fun_threshold_ctrl_output[i];
 		}
 		UART_send_and_fill_data_to_RF((unsigned char *)data, 14);
@@ -633,7 +633,7 @@ void s_Shields(void){
 			
 			cli(); //disabilita gli interrupt
 			for(int i=0;i<NUM_BYTE_EEPROM_USED_BY_EACH_SHIELD;i++){
-				wdt_reset(); //it reset the WDT
+				CLR_WDT(); //it reset the WDT
 				eeprom_write_byte ((unsigned char *)((START_ADDRESS_WHERE_TO_CONFIGURATIONS_SHIELD+i)+(eeprom_position*NUM_BYTE_EEPROM_USED_BY_EACH_SHIELD)), (unsigned char)cmd_rfpi[8+i]); //
 			
 				#ifdef UART_DEBUG_RFPIMCU
@@ -678,8 +678,7 @@ void b_Reboot(void){
 	#ifdef UART_DEBUG_RFPIMCU
 		UART_DEBUG_RFPIMCU_send_STR(23, (unsigned char *)"Going to reset ........",1); //it send a string through the UART only if is in debug mode
 	#endif			
-	var_RESET_NOW = 1; //at 1 it make the MCU to reset itself through the WDT
-	while(1);
+	REBOOT_MCU; //it make the MCU to reset itself through the WDT. Here the MCU does not execute the next instruction below
 	
 }
 
@@ -1363,11 +1362,11 @@ unsigned char check_btn_to_enter_in_programming(unsigned char var_Semaphore){
 	if( (var_Semaphore&0b00000001) == 0 ){
 		//check if the button has been pressed
 		while( (PIN_BTN_PROGRAMMING_MODE == LOGIC_BTN_PROGRAMMING_MODE) && (cont_ms_elapsed < TIME_BTN_TO_RESET_ADDRESSES) ){
-			wdt_reset(); //it reset the WDT
-			_delay_ms(1);
+			CLR_WDT(); //it reset the WDT
+			delay_ms_at328(1);
 			cont_ms_elapsed++;
 		}
-		wdt_reset(); //it reset the WDT
+		CLR_WDT(); //it reset the WDT
 		if(cont_ms_elapsed < TIME_BTN_TO_RESET_ADDRESSES){
 			#ifdef UART_DEBUG_RFPIMCU
 			UART_DEBUG_RFPIMCU_send_STR(56, (unsigned char *)"It will init and then set the programming network.......",1); //it send a string through the UART only if is in debug mode
@@ -1389,15 +1388,14 @@ unsigned char check_btn_to_enter_in_programming(unsigned char var_Semaphore){
 						PIN_LED_TX_ON; //led on
 					}
 				}else var_temp_byte++;
-				wdt_reset(); //it reset the WDT
-				_delay_ms(1);
+				CLR_WDT(); //it reset the WDT
+				delay_ms_at328(1);
 			}
 
-			wdt_reset(); //it reset the WDT
+			CLR_WDT(); //it reset the WDT
 			var_temp_byte = var_Semaphore | 0b00000001; //here disable the programming IoT network
 			eeprom_write_byte ((unsigned char *)(START_BYTE_TO_CHECK_SEMAPHORES), (unsigned char )var_temp_byte);
-			var_RESET_NOW = 1; //at 1 it make the MCU to reset itself through the WDT
-			while(1);
+			REBOOT_MCU; //it make the MCU to reset itself through the WDT. Here the MCU does not execute the next instruction below
 		}
 
 	}else{
