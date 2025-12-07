@@ -34,7 +34,7 @@
 //Function that read the settings into the eeprom and then load the shields configurations
 void 	manager_load_shields(void){
 	
-	unsigned char i;
+	unsigned char i,j;
 	
 	//init ADC because ADC1 is always used to get MCU Volts
 	init_10bit_adc(); //it init the ADC
@@ -97,12 +97,22 @@ void 	manager_load_shields(void){
 	
 	
 
-	for(i=0;i<10;i++){
+	for(i=0;i<(LENGHT_ARRAY_DATA_THRESHOLD_FUNC-2);i++){
 		//variables used for the functions into RFPIMCU, function Inputs Duty
 		fun_input_ctrl_output[i] = (unsigned char)eeprom_read_byte((unsigned char *)(START_ADDRESS_INPUTS_DUTY_VALUE+i));
 
 		//variables used for the functions into RFPIMCU, function control output with THRESHOLD HIGH and LOW
 		fun_threshold_ctrl_output[i] = (unsigned char)eeprom_read_byte((unsigned char *)(START_ADDRESS_THRESHOLD_VALUES+i));
+	}
+	fun_threshold_ctrl_output[10] = fun_threshold_ctrl_output[11] = 254; //init. the last 2 byte are used to know the last status set on the output
+	for(i=0;i<2;i++){
+		//variables used for the functions into RFPIMCU, function control output with THRESHOLD HIGH and LOW
+		cont_input_values_threshold_fun[i] = 0;
+		decont_delay_change_out_threshold_fun[i] = 0;
+		for(j=0;j<(unsigned char)NUM_SAMPLES_AVERAGE_THRESHOLD_FUNC;j++){
+			//variables used for the functions into RFPIMCU, function control output with THRESHOLD HIGH and LOW
+			input_values_threshold_fun[i][j] = 0;
+		}
 	}
 
 
@@ -418,6 +428,13 @@ void 	manager_load_shields(void){
 void check_and_parse_functions_manager_shield_every_1mS(void){
 	//unsigned char array_cmd[16];
 	
+	if(decont_delay_change_out_threshold_fun[0]>0){
+		decont_delay_change_out_threshold_fun[0]--;
+	}
+	if(decont_delay_change_out_threshold_fun[1]>0){
+		decont_delay_change_out_threshold_fun[1]--;
+	}
+
 	//this is a timer used in each function of a shield that needs a timer
 	if(cont_Timer_Manager_Shield_ms < 10){
 		cont_Timer_Manager_Shield_ms++;
@@ -467,6 +484,7 @@ void check_and_parse_functions_manager(void){
 	unsigned char array_cmd2[16];
 	unsigned char ii;
 	unsigned char ll;
+	unsigned char j;
 
 	//variabili usate per Input Duty
 	unsigned char temp_input_trigger;
@@ -619,8 +637,9 @@ void check_and_parse_functions_manager(void){
 				eeprom_write_byte ((unsigned char *)(START_ADDRESS_SETTINGS_PLATFORM), sem_Led_TX_keep_OFF);
 			}
 			if( (id_data_eeprom_to_update & 0b0000001000000000) != 0){	//it update into the EEPROM the values for THRESHOLD0 and THRESHOLD1
-				for(ii=0;ii<10;ii++)
+				for(ii=0;ii<(LENGHT_ARRAY_DATA_THRESHOLD_FUNC-2);ii++){
 					eeprom_write_byte ((unsigned char *)(START_ADDRESS_THRESHOLD_VALUES+ii), fun_threshold_ctrl_output[ii]);
+				}
 			}
 		
 			id_data_eeprom_to_update = 0;
@@ -689,9 +708,9 @@ void check_and_parse_functions_manager(void){
 			//											___________________________________________________________________
 			//											| VALUE bit6-bit7		< LOW THRESHOLD0		> HIGH THRESHOLD0 |
 			//											|_________________________________________________________________|
-			//											|		0x0 			SET OUT LOW 			SET OUT HIGH	  |
-			//											|		0x1 			SET OUT HIGH 			SET OUT LOW		  |
-			//											|		0x2				FUNCTION DISABLED		FUNCTION DISABLED |
+			//											|		0x1 			SET OUT LOW 			SET OUT HIGH	  |
+			//											|		0x2 			SET OUT HIGH 			SET OUT LOW		  |
+			//											|		0x3				FUNCTION DISABLED		FUNCTION DISABLED |
 			//											|_________________________________________________________________|
 			// ---------------------------------------------------------------------------------------
 			// ------------------- BYTE1+BYTE2	=	HIGH THRESHOLD0 ----------------------------------
@@ -708,9 +727,9 @@ void check_and_parse_functions_manager(void){
 			//											___________________________________________________________________
 			//											| VALUE bit6-bit7		< LOW THRESHOLD1		> HIGH THRESHOLD1 |
 			//											|_________________________________________________________________|
-			//											|		0x0 			SET OUT LOW 			SET OUT HIGH	  |
-			//											|		0x1 			SET OUT HIGH 			SET OUT LOW		  |
-			//											|		0x2				FUNCTION DISABLED		FUNCTION DISABLED |
+			//											|		0x1 			SET OUT LOW 			SET OUT HIGH	  |
+			//											|		0x2 			SET OUT HIGH 			SET OUT LOW		  |
+			//											|		0x3				FUNCTION DISABLED		FUNCTION DISABLED |
 			//											|_________________________________________________________________|
 			// ---------------------------------------------------------------------------------------
 			// ------------------- BYTE6+BYTE7	=	HIGH THRESHOLD1 ----------------------------------
@@ -725,11 +744,14 @@ void check_and_parse_functions_manager(void){
 				ii = ID_Function_Manager_to_Run - ID_FUNCTION_MANAGER_THRESHOLD0; // selects the bytes to do the controls
 					ll = (unsigned char)(ii*5); //index byte0
 					temp_status_output_to_set = (unsigned char)((fun_threshold_ctrl_output[ll] >> 6) & 0x03); // I get the way to control the output or if it is disabled with value 0x3
-					if(	temp_status_output_to_set != 0x03 ){ // if the function is NOT DISABLED then I check LOW and HIGH THRESHOLDS
+					if(	temp_status_output_to_set < 0x03 && temp_status_output_to_set > 0x00 ){ // if the function is NOT DISABLED then I check LOW and HIGH THRESHOLDS
 						temp_id_input = (unsigned char)(fun_threshold_ctrl_output[ll] & 0b00000111); // I get the input ID that control the output
 						//per sapere il valore fisico del pin corrispondente, estraggo il numero di pin relativo all'ID e poi ne leggo il valore
 						temp_num_pin_input = num_pin_iotgemini_from_id_input(temp_id_input);
 						varErrorReadingPin = return_value_pin(temp_num_pin_input, data);
+//						if(varErrorReadingPin > 0){
+//							BLINK_LED;
+//						}
 
 						#ifdef UART_DEBUG_MANAGER_FUNCTIONS_THRESHOLDS
 						UART_DEBUG_MANAGER_send_STR2((unsigned char *)"***",1);
@@ -765,18 +787,18 @@ void check_and_parse_functions_manager(void){
 							u16_temp_value_pin &= 0x00FF;
 							u16_temp_value_pin |= (unsigned int)(data[6] << 8);
 						}
-						if(cont_input_values_threshold_fun[ii] > 2){
-							cont_input_values_threshold_fun[ii] = 0;
-						}else{
+						if(cont_input_values_threshold_fun[ii] < (unsigned char)(NUM_SAMPLES_AVERAGE_THRESHOLD_FUNC-1)){
 							cont_input_values_threshold_fun[ii]++;
+						}else{
+							cont_input_values_threshold_fun[ii] = 0;
 						}
 						input_values_threshold_fun[ii][cont_input_values_threshold_fun[ii]] = u16_temp_value_pin; //recording the values
 						//going to do average
 						u32TempVar = 0;
-						for(ll=0;ll<4;ll++){
-							u32TempVar += input_values_threshold_fun[ii][ll];
+						for(j=0;j<(unsigned char)(NUM_SAMPLES_AVERAGE_THRESHOLD_FUNC);j++){
+							u32TempVar += input_values_threshold_fun[ii][j];
 						}
-						u32TempVar /= 4;
+						u32TempVar /= (unsigned long)(NUM_SAMPLES_AVERAGE_THRESHOLD_FUNC);
 						u16_temp_value_pin = (unsigned int) u32TempVar;
 
 
@@ -830,20 +852,43 @@ void check_and_parse_functions_manager(void){
 								#endif
 							}
 						}
-						ll = (unsigned char)(ii+10); //index byte10 for THRESHOLD0 and byte11 for THRESHOLD1
+						ll = (unsigned char)(ii+10); //last status output set: byte10 for THRESHOLD0 and byte11 for THRESHOLD1
 						temp_num_pin_output = num_pin_iotgemini_from_id_output(array_cmd2[7]); // dall'ID  (array_cmd2[7]) dell'output da controllare ottengo il numero di pin fisico che è nello schema
+//						if(fun_threshold_ctrl_output[ll] != array_cmd2[8]){ 	//the last 2 bytes of the vector fun_threshold_ctrl_output[] are used as flag to remember the last status of the output
+//							fun_threshold_ctrl_output[ll] = array_cmd2[8]; //saving last status thus it will not keep calling the function o_SetOut()
+//							o_SetOut(array_cmd2,1);		//Function to set the status of an output
+//						}
 						varErrorReadingPin = return_value_pin(temp_num_pin_output, (unsigned char *)data);
 						if(varErrorReadingPin==0){ //no error in reading status of the output
 							//data[4] //actual value of the output
 							//data[5] //size of the variable that contain the output status/value. If it is 1 the value is bolean, otherwise can be 8 thus is a byte which is used for PWM (RGB control)
-							if(	(array_cmd2[8] == 0 && data[4] > 0) 		//if the status to set (array_cmd2[8]) is different from the actual value of the status of the output (data[4]) then has to set the output with the new status (array_cmd2[8])
-								|| (array_cmd2[8] > 0 && data[4] == 0)
-								|| (fun_threshold_ctrl_output[ll] != data[4]) 	//the last 2 bytes of the vector fun_threshold_ctrl_output[] are used as flag to remember the last status of the output
+							if(	(	(array_cmd2[8] == 0 && data[4] > 0) 		//if the status to set (array_cmd2[8]) is different from the actual value of the status of the output (data[4]) then has to set the output with the new status (array_cmd2[8])
+									|| (array_cmd2[8] > 0 && data[4] == 0)
+									|| (fun_threshold_ctrl_output[ll] != data[4]) 	//the last 2 bytes of the vector fun_threshold_ctrl_output[] are used as flag to remember the last status of the output
+								) && (
+										decont_delay_change_out_threshold_fun[ii] == 0	//only when the TIME_DELAY_TO_SET_OUTPUT_THRESHOLD_FUNC is passed than it can change again the output
+									 )
 							){
 								fun_threshold_ctrl_output[ll] = data[4]; //saving last status thus it will not keep calling the function o_SetOut()
+								decont_delay_change_out_threshold_fun[ii] = TIME_DELAY_TO_SET_OUTPUT_THRESHOLD_FUNC; //reload the delay that will prevent another change of the output instantly
 								o_SetOut(array_cmd2,0);		//Function to set the status of an output
+//								  //deccoment the following lines to send the sensor value to the master
+//									data[0] = 'R';
+//									data[1] = 'B';
+//									data[2] = 'i';
+//									data[3] = temp_id_input;	//identifier input
+//									unsigned char num_pin_to_send_status=2;
+//									num_pin_to_send_status = num_pin_iotgemini_from_id_input(data[3]); //Function that return number of the pin (from pin3 to pin10) from the number of the ID
+//									varErrorReadingPin = return_value_pin(num_pin, (unsigned char *)data);
+//									if(varErrorReadingPin==0){
+//										Led_TX_OFF_and_after_delay_turn_ON(); //this make blink the led to notify the radio transmission
+//										UART_send_and_fill_data_to_RF((unsigned char *)data, 15);
+//									}
 							}
 						}
+//						else{
+//							BLINK_LED;
+//						}
 
 
 						#ifdef UART_DEBUG_MANAGER_FUNCTIONS_THRESHOLDS

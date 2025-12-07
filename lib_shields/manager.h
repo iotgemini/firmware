@@ -1,7 +1,7 @@
 /*****************************************************************
 	Programmer: 			Emanuele Aimone
 	Version:				1.0
-	Last Update:			01 / 03 / 2023
+	Last Update:			14 / 04 / 2025
 	
 	
 	List compatible MCU: 	ATmega328
@@ -49,6 +49,11 @@
 //LIST OF FUNCTION
 #define ID_FUNCTION_MANAGER_THRESHOLD0			7		//qui intendo eseguire la funzione threshold0 su di un output esistente con un input analogico
 #define ID_FUNCTION_MANAGER_THRESHOLD1			8		//qui intendo eseguire la funzione threshold1 su di un output esistente con un input analogico
+
+//DEFINE FOR THE FUNCTION
+#define LENGHT_ARRAY_DATA_THRESHOLD_FUNC		12		//Lenght of the array that contain all data to make works the thresold functions
+#define NUM_SAMPLES_AVERAGE_THRESHOLD_FUNC		8		//Number of samples to get to make an average that would be compared with the low thresold and the high thresold
+#define TIME_DELAY_TO_SET_OUTPUT_THRESHOLD_FUNC	10000	//mS. The maximum is 65535
 
 
 //---------------------------------------------------------------------------------
@@ -199,10 +204,23 @@ volatile unsigned char fun_input_ctrl_output[10];
 volatile unsigned char last_status_input;
 
 //used for the function 7 and 8 that is digital output controlled by THRESHOLD0 and THRESHOLD1
-volatile unsigned char fun_threshold_ctrl_output[12];	//this has the Values on 16bits that are the threshold to control an output
+volatile unsigned char fun_threshold_ctrl_output[LENGHT_ARRAY_DATA_THRESHOLD_FUNC];
+														//0 FUN0:	ID of the input that control the output | ID of the input that control the output | Way to control output
+														//1 FUN0:	LSB HIGH THRESHOLD
+														//2 FUN0:	MSB HIGH THRESHOLD
+														//3 FUN0:	LSB LOW THRESHOLD
+														//4 FUN0:	MSB LOW THRESHOLD
+														//5 FUN1:	ID of the input that control the output | ID of the input that control the output | Way to control output
+														//6 FUN1:	LSB HIGH THRESHOLD
+														//7 FUN1:	MSB HIGH THRESHOLD
+														//8 FUN1:	LSB LOW THRESHOLD
+														//9 FUN1:	MSB LOW THRESHOLD
+														//10 FUN0:	last status output set
+														//11 FUN1:	last status output set
 //Matrix to do average of the input value acquired
-volatile unsigned int	input_values_threshold_fun[2][4];
+volatile unsigned int	input_values_threshold_fun[2][NUM_SAMPLES_AVERAGE_THRESHOLD_FUNC];
 volatile unsigned char 	cont_input_values_threshold_fun[2];
+volatile unsigned int	decont_delay_change_out_threshold_fun[2];
 
 //---------------------------------------------------------------------------------
 //	END GLOBAL VARIABLES

@@ -85,7 +85,7 @@ void Request_DHT11(unsigned char pin)				// Microcontroller send start pulse/req
 {
 	pinMode(pin, OUTPUT); //DDRD |= (1<<DHT11_PIN);
 	digitalWrite(pin, LOW); //PORTD &= ~(1<<DHT11_PIN);	// set to low pin 
-	_delay_ms(20);			// wait for 20ms 
+	delay_ms_at328(20);			// wait for 20ms
 	digitalWrite(pin, HIGH); //PORTD |= (1<<DHT11_PIN);	// set to high pin 
 }
 
@@ -241,7 +241,7 @@ unsigned char dht11_read(unsigned char wheight_pin)
 //			// REQUEST SAMPLE
 //			pinMode(wheight_pin, OUTPUT);
 //			digitalWrite(wheight_pin, LOW);
-//			_delay_ms(18);
+//			delay_ms_at328(18);
 //			digitalWrite(wheight_pin, HIGH);
 //			delayMicroseconds(40);
 //			enablePullUp(wheight_pin);
